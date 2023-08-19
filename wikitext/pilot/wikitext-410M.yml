@@ -1,4 +1,4 @@
-{
+{  
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
 
@@ -70,10 +70,10 @@
   },
 
   "train_iters": 1140,
-  "lr_decay_iters": 143000,
+  "lr_decay_iters": 1140,
   "distributed_backend": "nccl",
   "lr_decay_style": "cosine",
-  "warmup": 0.20,
+  "warmup": 0.1,
 
   "checkpoint_factor": 228,
   "checkpoint_scale": "linear",

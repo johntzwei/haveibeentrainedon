@@ -18,12 +18,12 @@
 
   "vocab_file": "data/gpt2-vocab.json",
   "merge_file": "data/gpt2-merges.txt",
+  "tokenizer_type": "GPT2BPETokenizer",
 
   "save": "wikitext_perturbed_cp",
   "load": "wikitext_perturbed_cp",
   "checkpoint_validation_with_forward_pass": False,
 
-  "tensorboard_dir": "tensorboard",
   "log_dir": "logs",
   "use_wandb": True,
   "wandb_host": "https://api.wandb.ai",

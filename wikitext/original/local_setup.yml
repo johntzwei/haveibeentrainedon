@@ -1,7 +1,7 @@
 # Suggested data paths when using GPT-NeoX locally
 {
   "data_path": "data/wikitext/wikitext_text_document",
-  "split": "1,1,998",
+  "split": "998,1,1",
 
   # or for weighted datasets:
   # "train-data-paths": ["data/enwik8/enwik8_text_document", "data/enwik8/enwik8_text_document"],
@@ -23,7 +23,6 @@
   "load": "wikitext_cp",
   "checkpoint_validation_with_forward_pass": False,
 
-  "tensorboard_dir": "tensorboard",
   "log_dir": "logs",
   "use_wandb": True,
   "wandb_host": "https://api.wandb.ai",
