@@ -1,6 +1,6 @@
 # Suggested data paths when using GPT-NeoX locally
 {
-  "data_path": "data/wikitext_perturbed/wikitext_perturbed_text_document",
+  "data_path": "/home/johnny/gpt-neox/data/wikitext_perturbed/wikitext_perturbed_text_document",
   "split": "998,1,1",
 
   # or for weighted datasets:
@@ -16,8 +16,8 @@
   # "weight_by_num_documents": false,
   # "weighted_sampler_alpha": 0.3,
 
-  "vocab_file": "data/gpt2-vocab.json",
-  "merge_file": "data/gpt2-merges.txt",
+  "vocab_file": "/home/johnny/gpt-neox/data/gpt2-vocab.json",
+  "merge_file": "/home/johnny/gpt-neox/data/gpt2-merges.txt",
   "tokenizer_type": "GPT2BPETokenizer",
 
   "save": "wikitext_perturbed_cp",
@@ -29,5 +29,5 @@
   "wandb_host": "https://api.wandb.ai",
   "wandb_project": "neox",
 
-  "include": "localhost:8,9"
+  "include": "localhost:0,1,2,3,4,6,7,8"
 }
