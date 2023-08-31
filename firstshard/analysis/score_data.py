@@ -165,19 +165,16 @@ def get_prop_inputs(args, ds, swap_arr):
 
 #Calcualtes the score of the in_data
 def score(args, tokenizer, device, model):
-    in_data = list(csv.reader(open(args.prop_inputs, 'rt')))
-    header = in_data[0]
-    in_data = in_data[1:]
-    # in_file = open(args.prop_inputs, 'r')
-    # header = in_file.readline()
-    # curr_line = in_file.readline()
+    in_data = csv.reader(open(args.prop_inputs, 'rt'))
+    next(in_data, None)
 
     out_fh = open(args.out_path, 'wt')
     out = csv.writer(out_fh)
 
-    for i, line in tqdm(enumerate(in_data), total=len(in_data)):
+    for i, line in enumerate(in_data):
         line_idx, sentence, char_idx, w1, w2, substituted = line
         line_idx, char_idx = int(line_idx), int(char_idx)
+
 
         # get the tokenized version of the swap pair
         w1_idx = tokenizer.encode(f' {w1}', return_tensors='pt')[0, 0].item()
@@ -223,8 +220,8 @@ def main(args):
     ds, swap_arr = setup_data(args)
     print("completed datasets")
 
-    #This prepares the inputs for the scoring and stores the inputs into a csv file
-    get_prop_inputs(args, ds, swap_arr)
+    # #This prepares the inputs for the scoring and stores the inputs into a csv file
+    # get_prop_inputs(args, ds, swap_arr)
 
     #This uses the get_prop_inputs generated csv file to create a scored csv file
     score(args, tokenizer, device, model)

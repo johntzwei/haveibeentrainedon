@@ -9,12 +9,12 @@ ANALYSIS_DIR=./../analysis
 #The directory for GPT-NeoX
 NEOX_DIR=./../../gpt-neox
 
-MODEL=perturb_model
+MODEL=perturb_model_1_percent
 
 #Initialize the directories
 mkdir -p ${ANALYSIS_DIR}/${MODEL}
 
-python ${ANALYSIS_DIR}/score_data.py\
+CUDA_VISIBLE_DEVICES=9 python ${ANALYSIS_DIR}/score_data.py\
   --model_path ${ANALYSIS_DIR}/${MODEL}/global_step_2146\
   --data_path ${DATA_DIR}/00_45e8.jsonl\
   --swap_arr_path ${DATA_DIR}/${MODEL}/00_45e8_swap_arr.npy\
