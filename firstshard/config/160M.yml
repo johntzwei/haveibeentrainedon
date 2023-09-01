@@ -80,4 +80,8 @@
   "steps_per_print": 10,
   "wall_clock_breakdown": true,
 
+  "tokenizer_type": "GPT2BPETokenizer",
+  "vocab_file": "/home/ryan/haveibeentrainedon/firstshard/data/gpt2-vocab.json",
+  "merge_file": "/home/ryan/haveibeentrainedon/firstshard/data/gpt2-merges.txt"
+
 }

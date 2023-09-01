@@ -1,13 +1,10 @@
 import datasets
 from tqdm.notebook import tqdm
 import numpy as np
+import argparse
 
-orig_data = "00_45e8.jsonl"
 num_cpus = 120
-swap_arr_name = "00_45e8_swap_arr.npy"
-hf_dataset_name = "first_shard_perturbed_seed:416.hf"
-out_json_dataset_name = "00_45e8_perturbed.jsonl"
-
+args = None
 
 # duplicates manually removed
 # all pairs have more than 423 counts (so there is 100 substitutions)
@@ -113,10 +110,15 @@ word_pairs = [
     ('raise', 'VERB', 'lift'),
     ('hire', 'VERB', 'enlist')]
 
-def main():
-    #This converts the jsonl to huggingface
-    ds = datasets.load_dataset("json", data_files=orig_data)
 
+def convert_huggingface_to_json():
+    edited_ds = datasets.load_from_disk(args.hf_dataset_name)
+    edited_ds.to_json(args.out_json_dataset_name, num_proc=num_cpus)
+
+
+def perturb():
+    #This converts the jsonl to huggingface
+    ds = datasets.load_dataset("json", data_files=args.data_path)
     print(len(ds["train"]))
 
     # This appends a "hash" column to each entry
@@ -164,7 +166,7 @@ def main():
     print(swap_arr.shape)
 
     # saves the swap_arr
-    np.save(swap_arr_name, swap_arr)
+    np.save(args.swap_arr_name, swap_arr)
 
     # This random state allows the perturbations to be reproducible
     rs = np.random.RandomState(seed=416)
@@ -181,7 +183,7 @@ def main():
         idx = np.arange(len(swap_arr))
         has_sub = idx[swap_arr[:, i] == 1]
         rs.shuffle(has_sub)
-        do_sub.append(list(has_sub[:int(0.1 * len(has_sub))]))
+        do_sub.append(list(has_sub[:int(0.01 * len(has_sub))]))
 
     #Performs the map that will perturb the data. Records the perturbation in the "order" section of the data
     def edit(x, index):
@@ -203,12 +205,46 @@ def main():
     )
 
     #saves the data
-    edited_ds.save_to_disk(hf_dataset_name)
+    edited_ds.save_to_disk(args.hf_dataset_name)
 
-def convert_huggingface_to_json():
-    edited_ds = datasets.load_from_disk(hf_dataset_name)
-    edited_ds.to_json(out_json_dataset_name, num_proc=num_cpus)
-
-if __name__ == '__main__':
-    # main()
+def main():
+    #Performs the perturbations
+    perturb()
+    #converts the resulting model to huggingface
     convert_huggingface_to_json()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+
+    parser.add_argument(
+        "--data_path",
+        required=True,
+        type=str,
+        help="the path leading to the data that will be perturbed"
+    )
+
+    parser.add_argument(
+        "--swap_arr_name",
+        default="swap_arr.npy",
+        type=str,
+        help="name of the file that stores the swap array that stores the synonym labels of each document"
+    )
+
+    parser.add_argument(
+        "--hf_dataset_name",
+        default="hf_dataset.hf",
+        type=str,
+        help="the name of the huggingface dataset folder to store the perturbed data in"
+    )
+
+    parser.add_argument(
+        "--out_json_dataset_name",
+        default="out.jsonl",
+        type=str,
+        help="the name of the final outputted perturbed jsonl file"
+    )
+
+    args = parser.parse_args()
+    main()
+
