@@ -6,6 +6,9 @@ from tqdm import tqdm
 import pandas as pd
 import csv
 import torch
+import sys
+
+csv.field_size_limit(sys.maxsize)
 
 # duplicates manually removed
 # all pairs have more than 423 counts (so there is 100 substitutions)
@@ -113,13 +116,13 @@ word_pairs = [
 
 max_length = 2048
 
-def setup_model(args):
+def setup_model(args, device):
     model=GPTNeoXForCausalLM.from_pretrained(args.model_path)
 
     model_size = sum(t.numel() for t in model.parameters())
     print(f"GPT-neo size: {model_size / 1000 ** 2:.1f}M parameters")
     # model = GPTNeoForCausalLM.from_pretrained(args.CONST["model_type"])
-    return model
+    return model.to(device)
 
 def setup_device(args):
     return 'cuda' if torch.cuda.is_available else 'cpu'
@@ -211,13 +214,13 @@ def score(args, tokenizer, device, model):
 
 def main(args):
     print("begin")
-    model = setup_model(args)
-    print("completed model")
     device = setup_device(args)
     print(f"completed setup of device on {device}")
+    model = setup_model(args, device)
+    print("completed model")
     tokenizer = setup_tokenizer(args)
     print("completed tokenizer")
-    ds, swap_arr = setup_data(args)
+    # ds, swap_arr = setup_data(args)
     print("completed datasets")
 
     # #This prepares the inputs for the scoring and stores the inputs into a csv file
