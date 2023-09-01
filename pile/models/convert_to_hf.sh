@@ -1,0 +1,1 @@
+python ./tools/convert_module_to_hf.py --input_dir ./runs/70M_perturbed_cp/global_step839/ --config_file haveibeentrainedon/pile/70M/70M.yml --output_dir haveibeentrainedon/pile/models/perturbed_final
