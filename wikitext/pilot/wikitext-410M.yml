@@ -5,8 +5,8 @@
   "num_layers": 24,
   "hidden_size": 1024,
   "num_attention_heads": 16,
-  "seq_length": 1024,
-  "max_position_embeddings": 1024,
+  "seq_length": 512,
+  "max_position_embeddings": 512,
   "pos_emb": "rotary",
   "rotary_pct": 0.25,
   "no_weight_tying": true,
@@ -74,8 +74,8 @@
       "min_loss_scale": 1
   },
 
-  "train_iters": 1140,
-  "lr_decay_iters": 114000,
+  "train_iters": 2280,
+  "lr_decay_iters": 228000,
   "distributed_backend": "nccl",
   "lr_decay_style": "cosine",
   "warmup": 0.003,
