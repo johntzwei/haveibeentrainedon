@@ -1,1 +1,1 @@
-python ./tools/convert_module_to_hf.py --input_dir ./runs/70M_perturbed_cp/global_step839/ --config_file haveibeentrainedon/pile/70M/70M.yml --output_dir haveibeentrainedon/pile/models/perturbed_final
+python /home/ryan/haveibeentrainedon/gpt-neox/tools/convert_module_to_hf.py --input_dir /home/ryan/haveibeentrainedon/models/160M/perturb_model_1_epoch/global_step2146 --config_file /home/ryan/haveibeentrainedon/models/160M/perturb_model_1_epoch/160M.yml --output_dir /home/ryan/haveibeentrainedon/models/160M/perturb_model_1_epoch/perturb_model_1_epoch_hf
