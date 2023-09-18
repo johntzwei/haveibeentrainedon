@@ -1,7 +1,7 @@
 # Suggested data paths when using GPT-NeoX locally
 {
   "data_path": "/home/ryan/haveibeentrainedon/data/45e8_tokenized_unperturbed_text_document",
-  "split": "999,1,1",
+  "split": "999,1,0",
 
   # or for weighted datasets:
   # "train-data-paths": ["data/enwik8/enwik8_text_document", "data/enwik8/enwik8_text_document"],

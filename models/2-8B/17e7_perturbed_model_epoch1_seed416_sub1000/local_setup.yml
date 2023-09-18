@@ -1,6 +1,6 @@
 # Suggested data paths when using GPT-NeoX locally
 {
-  "data_path": "/home/ryan/haveibeentrainedon/data/45e8_tokenized_unperturbed_text_document",
+  "data_path": "./../data/17e7_perturbed_seed416_sub1000/dataset_neox/tokenized_text_document",
   "split": "999,1,0",
 
   # or for weighted datasets:
@@ -20,18 +20,20 @@
 #  "merge_file": "/home/ryan/haveibeentrainedon/firstshard/data/gpt2-merges.txt",
 #  "tokenizer_type": "GPT2BPETokenizer",
 
-  "save": "/home/ryan/haveibeentrainedon/160M/clean_model_1_epoch",
-  "load": "/home/ryan/haveibeentrainedon/160M/clean_model_1_epoch",
+  "save": "./../models/2-8B/17e7_perturbed_model_epoch1_seed416_sub1000/training",
+  "load": "./../models/2-8B/17e7_perturbed_model_epoch1_seed416_sub1000/training",
   "checkpoint_validation_with_forward_pass": False,
 
   "log_dir": "logs",
   "use_wandb": True,
   "wandb_host": "https://api.wandb.ai",
-  "wandb_project": "160M_Clean_1_epoch",
+  "wandb_project": "2-8B_perturbed_1_epoch",
 
 #  "include": "localhost:0,1,2,3"
 #  "include": "localhost:4,6,7,8"
 
-  "include": "localhost:0,1,2,3,4,6,7,8"
+  "master_port": 29502,
+
+  "include": "localhost:4,6,7,8"
 
 }

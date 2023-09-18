@@ -3,7 +3,7 @@
   "model_parallel_size": 1,
 
   "num_layers": 24,
-  "hidden_size": 1024,
+  "hidden_size": 2048,
   "num_attention_heads": 16,
   "seq_length": 2048,
   "max_position_embeddings": 2048,
@@ -24,12 +24,12 @@
   "optimizer": {
     "type": "Adam",
     "params": {
-      "lr": 0.0003,
+      "lr": 0.0002,
       "betas": [0.9, 0.95],
       "eps": 1.0e-8
     }
   },
-  "min_lr": 0.00003,
+  "min_lr": 0.00002,
 
   "zero_optimization": {
     "stage": 1,
@@ -42,12 +42,11 @@
     "cpu_offload": false
   },
 
-  "train_micro_batch_size_per_gpu": 32,
-  "gradient_accumulation_steps": 4,
-  "global_num_gpus": 8,
+  "train_micro_batch_size_per_gpu": 4,
+  "gradient_accumulation_steps": 64,
+  "global_num_gpus": 4,
   "train_batch_size": 1024,
   "data_impl": "mmap",
-  "num_workers": 1,
 
   "checkpoint_activations": true,
   "checkpoint_num_layers": 1,
@@ -69,17 +68,19 @@
     "min_loss_scale": 1
   },
 
-  "train_iters": 21458,
-  "lr_decay_iters": 21458,
+  "train_iters": 810,
+  "lr_decay_iters": 810,
   "distributed_backend": "nccl",
   "lr_decay_style": "cosine",
   "warmup": 0.01,
-  "checkpoint_factor": 2146,
-  "eval_interval": 143000,
-  "eval_iters": 100,
+  "checkpoint_factor": 405,
+  "eval_interval": 50,
 
   "log_interval": 10,
   "steps_per_print": 10,
   "wall_clock_breakdown": true,
 
-}
+  "tokenizer_type": "GPT2BPETokenizer",
+  "vocab_file": "./../data/gpt2-vocab.json",
+  "merge_file": "./../data/gpt2-merges.txt"
+  }
