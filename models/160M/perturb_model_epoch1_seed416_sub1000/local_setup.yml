@@ -1,7 +1,7 @@
 # Suggested data paths when using GPT-NeoX locally
 {
-  "data_path": "/home/ryan/haveibeentrainedon/data/45e8_perturbed_seed416_sub1000/perturbed_text_document",
-  "split": "999,1,1",
+  "data_path": "/home/ryan/haveibeentrainedon/data/45e8_perturbed_seed416_sub1000/dataset_neox/perturbed_text_document",
+  "split": "999,1,0",
 
   # or for weighted datasets:
   # "train-data-paths": ["data/enwik8/enwik8_text_document", "data/enwik8/enwik8_text_document"],
@@ -20,8 +20,8 @@
 #  "merge_file": "/home/ryan/haveibeentrainedon/firstshard/data/gpt2-merges.txt",
 #  "tokenizer_type": "GPT2BPETokenizer",
 
-  "save": "/home/ryan/haveibeentrainedon/models/160M/perturb_model_epoch1_seed416_sub1000",
-  "load": "/home/ryan/haveibeentrainedon/models/160M/perturb_model_epoch1_seed416_sub1000",
+  "save": "/home/ryan/haveibeentrainedon/models/160M/perturb_model_epoch1_seed416_sub1000/training",
+  "load": "/home/ryan/haveibeentrainedon/models/160M/perturb_model_epoch1_seed416_sub1000/training",
   "checkpoint_validation_with_forward_pass": False,
 
   "log_dir": "logs",

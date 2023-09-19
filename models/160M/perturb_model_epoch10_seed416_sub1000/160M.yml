@@ -43,8 +43,8 @@
   },
 
   "train_micro_batch_size_per_gpu": 32,
-  "gradient_accumulation_steps": 8,
-  "global_num_gpus": 4,
+  "gradient_accumulation_steps": 4,
+  "global_num_gpus": 8,
   "train_batch_size": 1024,
   "data_impl": "mmap",
 
@@ -68,16 +68,16 @@
     "min_loss_scale": 1
   },
 
-  "train_iters": 2146,
-  "lr_decay_iters": 2146,
+  "train_iters": 21458,
+  "lr_decay_iters": 21458,
   "distributed_backend": "nccl",
   "lr_decay_style": "cosine",
   "warmup": 0.01,
-  "checkpoint_factor": 1073,
-  "eval_interval": 100,
+  "checkpoint_factor": 5365,
+  "eval_interval": 500,
 
-  "log_interval": 100,
-  "steps_per_print": 100,
+  "log_interval": 500,
+  "steps_per_print": 500,
   "wall_clock_breakdown": true,
 
   "tokenizer_type": "GPT2BPETokenizer",
