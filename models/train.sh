@@ -4,7 +4,7 @@ MODEL_DIR=./../models
 
 
 #this is for the config files
-config_directory=./410M/17e7_clean_model_epoch1
+config_directory=./410M/410M_exp2_0_clean
 
 #for the specific file names
 yml_file=410M.yml
