@@ -42,10 +42,14 @@
     "cpu_offload": false
   },
 
-  "train_micro_batch_size_per_gpu": 32,
+  "train_micro_batch_size_per_gpu": 25,
   "gradient_accumulation_steps": 4,
-  "global_num_gpus": 8,
-  "train_batch_size": 1024,
+  "global_num_gpus": 9,
+  "train_batch_size": 900,
+#  "train_micro_batch_size_per_gpu": 32,
+#  "gradient_accumulation_steps": 4,
+#  "global_num_gpus": 8,
+#  "train_batch_size": 1024,
   "data_impl": "mmap",
 
   "checkpoint_activations": true,
