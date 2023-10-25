@@ -4,7 +4,7 @@ MODEL_DIR=./../models
 
 #for perturb data
 #the folder under DATA_DIR
-dataset_directory=17e7_perturbed_seed416_sub1000
+dataset_directory=17e7_ambiguity_exp
 #the specific input file name inside dataset_directory folder
 input_data=${DATA_DIR}/${dataset_directory}/17e7_tokens_perturbed.jsonl
 
