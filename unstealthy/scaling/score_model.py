@@ -6,12 +6,8 @@ from src.unstealthy.score import calculate_scores_unstealthy
 
 def main(args):
 
-    # params = {"path_to_model": args.path_to_model}
     calculate_scores_unstealthy(**vars(args))
-    #next steps:
-    #1. Add this python file into pipeline
-    #2. Test the perplexity
-    #3. Store into scoring script
+
 
 def parse_args():
     parser = argparse.ArgumentParser()

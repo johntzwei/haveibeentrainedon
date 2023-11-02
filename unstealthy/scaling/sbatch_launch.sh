@@ -2,7 +2,7 @@
 #SBATCH --nodelist=allegro-adams
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=40
 #SBATCH --output=160M_test.txt
 

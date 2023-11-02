@@ -48,10 +48,10 @@ def calculate_scores_unstealthy(**kwargs):
     watermark_length, vocab_size = df["seq_len"][0], df["vocab_size"][0]
     vocab_size, watermark_length = int(vocab_size), int(watermark_length)
     nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"], sequence_input_ids.shape[-1], vocab_size)
-    import pdb
-    pdb.set_trace()
-    string_nullhyp = tokenizer.batch_decode(nullhyp_seqs)
-    encoded_nullhyp = tokenizer.encode(string_nullhyp, return_tensors="pt")
+    tokenized_list = [tokenizer.encode(tokenizer.decode(i, return_tensors="pt"), return_tensors='pt') for i in nullhyp_seqs]
+    # print("tokenized_list = " + tokenized_list[0])
+    # print(len(tokenized_list))
+
 
     #this supports batching
     def _calculate_perplexity(tokenized_sequence):
@@ -63,15 +63,15 @@ def calculate_scores_unstealthy(**kwargs):
         return calculate_perplexity(logits, tokenized_sequence, shift=True)
 
     watermark_perplexity = _calculate_perplexity(sequence_input_ids)
-    print(watermark_perplexity)
-    random_perplexity = _calculate_perplexity(torch.tensor(nullhyp_seqs))
-    print(random_perplexity.shape)
+    random_perplexity = [_calculate_perplexity(i).tolist() for i in tokenized_list]
+
+    # print(random_perplexity.shape)
 
 
     # calculate_perplexity_with_shift(logits, nullhyp_seqs)
 
     out.writerow(watermark_perplexity.tolist())
-    out.writerows(random_perplexity.unsqueeze(-1).tolist())
+    out.writerows(random_perplexity)
 
 
     out_fh.close()

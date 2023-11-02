@@ -5,12 +5,12 @@ SRC_PATH=./../../src
 
 #where are data is stored
 dataset_dir=${DATA_DIR}/wikitext
-config_dir=./160M
-model_config_file=160M.yml
+config_dir=./70M
+model_config_file=70M.yml
 #where we want to store our model
-model_out_dir=${MODEL_DIR}/160M
-gpu_names=0,1,2,3
-num_gpus=4
+model_out_dir=${MODEL_DIR}/70M
+gpu_names=0
+num_gpus=1
 train_batch_size=1024
 train_micro_batch_size_per_gpu=32
 gradient_accumulation_steps=8
@@ -99,8 +99,6 @@ if [ -d "$dataset_dir" ]; then
             --output_score_path ${save}/scored.csv
 
 
-
-    break
     ### --- in this code block we perform an entire pipeline
   done
 else
