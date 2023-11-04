@@ -2,6 +2,7 @@
 #this edits a yaml file with certain parameters
 def edit_yaml(path_to_yaml, **kwargs):
     import yaml
+    print(path_to_yaml)
     with open(path_to_yaml) as f:
         list_doc = yaml.safe_load(f)
     for k, v in kwargs.items():

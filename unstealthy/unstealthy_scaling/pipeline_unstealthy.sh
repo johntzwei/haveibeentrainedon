@@ -3,34 +3,85 @@ DATA_DIR=./../../data
 MODEL_DIR=./../../models
 SRC_PATH=./../../src
 
+#This exits the script if any command fails
+set -e
 
+#This file should be stored under a subdirectory of "unstealthy", with the following scripts:
+# 1. score_model.py - used to score the model
+# 2. update_configs.py - used to update yaml configs
+# 3. misc.py - used for miscellaneous stuff
 
-#where are data is stored
-dataset_dir=${DATA_DIR}/wikitext
+##############Hyperparameters to change START ##################
+exp_name=unstealthy_scaling
+#NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
+#NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
+
+run_ID="Using tokens per batch of 512. Keeping all others the same"
+#this will be stored in the output model files to help debugging
+
+log_folder="sbatch_out"
+mkdir -p $log_folder
+#this is the folder that sbatch outputs will be stored in
+
+exp_dataset_dir=${DATA_DIR}/${exp_name}
+#Where the folders of datasets that have already been perturbed should be stored
+
+#each model config should be stored in their respective folders
 config_dir=./70M
-model_config_file=70M.yml
+model_config_file=${config_dir}/70M.yml
+model_local_setup=${config_dir}/local_setup.yml
+
 #where we want to store our model
-model_out_dir=${MODEL_DIR}/70M
+model_out_dir=${MODEL_DIR}/${exp_name}/70M
+
+#training configs
+#wikitext has 117919547 tokens
 gpu_names=0
 num_gpus=1
 train_batch_size=1024
 train_micro_batch_size_per_gpu=32
-gradient_accumulation_steps=8
-train_iters=56
+gradient_accumulation_steps=32
+train_iters=225
 
-#Hyperparameters that shouldn't be changed
-null_seed=1
+#scoring configs
 #this is the number of random sequences that form the null
 null_n_seq=1000
+null_seed=1  #shouldn't be changed
+##############Hyperparameters to change END ##################
 
-if [ -d "$dataset_dir" ]; then
-  echo "using data inside $dataset_dir"
+
+#intiialize the model directory if they don't exist. breaks if the directories don't exist
+mkdir -p $MODEL_DIR
+if [ ! -d $NEOX_DIR ]; then
+  echo "missing neox directory"
+  exit 1
+elif [ ! -d $SRC_PATH ]; then
+  echo "missing src directory"
+  exit 1
+elif [ ! -d $DATA_DIR ]; then
+  echo "missing data directory"
+  exit 1
+fi
+
+
+if [ -d "$exp_dataset_dir" ]; then
+
+  #each dataset should have a dataset postfix in its folder name
+#  all_datasets=("$exp_dataset_dir"/*dataset)
+  #uncomment the following line if you just want to train model and score on one or a group of particular dataset
+  all_datasets="${exp_dataset_dir}/300_dataset"
+
+  echo "scoring the following dataset(s): $all_datasets"
+
   # Loop through all datasets from 15 to 300
-  for dataset_dir in "$dataset_dir"/*dataset; do
+  for dataset_dir in ${all_datasets}; do
+
+    echo "using data inside $dataset_dir"
     #the jsonl version of the current dataset
     json_dataset=("$dataset_dir"/*jsonl)
     #the huggingface version of the current dataset
     hf_dataset=("$dataset_dir"/*hf)
+    #the propagation inputs of the current dataset
     propagation_inputs=("$dataset_dir"/*csv)
 
     ### --- in this code block we perform an entire pipeline
@@ -41,67 +92,57 @@ if [ -d "$dataset_dir" ]; then
     tokenized_dir="${dataset_dir}/dataset_neox"
 
     #delete the directory if it existed before
-#    if [ -e "$tokenized_dir" ]; then
-#      echo "removing old directory $tokenized_dir"
-#      rm -r $tokenized_dir
-#    fi
-#    mkdir $tokenized_dir
-#
-#    python $NEOX_DIR/tools/preprocess_data.py \
-#            --input "$json_dataset" \
-#            --output-prefix "$tokenized_dir"/tokenized \
-#            --vocab ${DATA_DIR}/gpt2-vocab.json \
-#            --merge-file ${DATA_DIR}/gpt2-merges.txt \
-#            --dataset-impl mmap \
-#            --tokenizer-type GPT2BPETokenizer \
-#            --append-eod \
-#            --workers 128
+    if [ -e "$tokenized_dir" ]; then
+      echo "Found previously cached $tokenized_dir"
+    else
+      echo "------------Status: beginning tokenization at $tokenized_dir"
+      python $NEOX_DIR/tools/preprocess_data.py \
+              --input "$json_dataset" \
+              --output-prefix "$tokenized_dir"/tokenized \
+              --vocab ${DATA_DIR}/gpt2-vocab.json \
+              --merge-file ${DATA_DIR}/gpt2-merges.txt \
+              --dataset-impl mmap \
+              --tokenizer-type GPT2BPETokenizer \
+              --append-eod \
+              --workers 128
+    fi
 
-#    #---Where we want to train our data
+    echo "------------Status: finished tokenization at $tokenized_dir"
 
-    #folder location to store the model
-    save=$(python misc.py\
+    #---Where we want to train our data
+
+    #this is the name of our model - 105_model, etc, according to dataset name
+    model_name=$(python misc.py\
             --mode get_model_dir\
             --dataset_dir $dataset_dir\
             --model_out_dir $model_out_dir)
+    #folder location to store the model
+    save=${model_out_dir}/${model_name}
     echo $save
 
     #delete the directory if it existed before
-#    if [ -e "$save" ]; then
-#      echo "removing old directory"
-#      rm -r $save
-#    fi
-#
-#    python update_configs.py\
-#            --path_to_model_yaml ${config_dir}/$model_config_file\
-#            --path_to_setup_yaml ${config_dir}/local_setup.yml\
-#            --global_num_gpus $num_gpus\
-#            --train_batch_size $train_batch_size\
-#            --train_micro_batch_size_per_gpu $train_micro_batch_size_per_gpu\
-#            --gradient_accumulation_steps=$gradient_accumulation_steps\
-#            --train_iters $train_iters\
-#            --data_path "$tokenized_dir"/tokenized_text_document\
-#            --save $save\
-#            --include "localhost:$gpu_names"
-#
-#    python $NEOX_DIR/deepy.py $NEOX_DIR/train.py \
-#            -d $config_dir $model_config_file local_setup.yml
-#
-##    convert the model
-#    python $NEOX_DIR/tools/convert_module_to_hf.py \
-#            --input_dir "${save}/global_step${train_iters}/" \
-#            --config_file ${config_dir}/$model_config_file \
-#            --output_dir ${save}/hf_model
+    if [ -e "$save" ]; then
+      echo "removing old directory"
+      rm -r $save
+    fi
+    mkdir -p $save
 
-    CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
-            --path_to_model ${save}/hf_model\
-            --path_to_inputs $propagation_inputs\
-            --null_seed $null_seed\
-            --null_n_seq $null_n_seq\
-            --output_score_path ${save}/scored.csv
+    echo "------------Status: updating configs  at $tokenized_dir"
 
+    #preparing for sbatch outputs and its execution
+    sbatch_log=${log_folder}/${model_name}.txt
+    cwd=$(realpath ".")
+
+    sbatch --output=${sbatch_log} sbatch_launch.sh \
+              $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
+              $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
+              $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
+              $null_n_seq $model_name "$run_ID"
+
+    echo "------------Status: submitted batch job for model $model_name"
     ### --- in this code block we perform an entire pipeline
+    break
   done
 else
-  echo "Folder not found: $folder_path"
+  echo "missing data directory: $exp_dataset_dir"
 fi

@@ -16,11 +16,11 @@ exp_name=unstealthy_scaling
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-run_ID="this run is updating the tokens per batch"
+run_ID="Using tokens per batch of 512. Keeping all others the same"
 #this will be stored in the output model files to help debugging
 
 log_folder="sbatch_out"
-mkdir -p log_folder
+mkdir -p $log_folder
 #this is the folder that sbatch outputs will be stored in
 
 exp_dataset_dir=${DATA_DIR}/${exp_name}
@@ -35,12 +35,13 @@ model_local_setup=${config_dir}/local_setup.yml
 model_out_dir=${MODEL_DIR}/${exp_name}/70M
 
 #training configs
+#wikitext has 117919547 tokens
 gpu_names=0
 num_gpus=1
 train_batch_size=1024
 train_micro_batch_size_per_gpu=32
 gradient_accumulation_steps=32
-train_iters=56
+train_iters=225
 
 #scoring configs
 #this is the number of random sequences that form the null
@@ -66,14 +67,15 @@ fi
 if [ -d "$exp_dataset_dir" ]; then
 
   #each dataset should have a dataset postfix in its folder name
-  all_datasets=("$exp_dataset_dir"/*dataset)
+#  all_datasets=("$exp_dataset_dir"/*dataset)
   #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-#  all_datasets="${datsaet_dir}/300_dataset ${datsaet_dir}/285_dataset"
+  all_datasets="${exp_dataset_dir}/300_dataset"
 
-  echo "scoring the following dataset: $all_datasets"
+  echo "scoring the following dataset(s): $all_datasets"
 
   # Loop through all datasets from 15 to 300
   for dataset_dir in ${all_datasets}; do
+
     echo "using data inside $dataset_dir"
     #the jsonl version of the current dataset
     json_dataset=("$dataset_dir"/*jsonl)
@@ -91,22 +93,19 @@ if [ -d "$exp_dataset_dir" ]; then
 
     #delete the directory if it existed before
     if [ -e "$tokenized_dir" ]; then
-      echo "removing old directory $tokenized_dir"
-      rm -r $tokenized_dir
+      echo "Found previously cached $tokenized_dir"
+    else
+      echo "------------Status: beginning tokenization at $tokenized_dir"
+      python $NEOX_DIR/tools/preprocess_data.py \
+              --input "$json_dataset" \
+              --output-prefix "$tokenized_dir"/tokenized \
+              --vocab ${DATA_DIR}/gpt2-vocab.json \
+              --merge-file ${DATA_DIR}/gpt2-merges.txt \
+              --dataset-impl mmap \
+              --tokenizer-type GPT2BPETokenizer \
+              --append-eod \
+              --workers 128
     fi
-    mkdir $tokenized_dir
-
-    echo "------------Status: beginning tokenization at $tokenized_dir"
-
-    python $NEOX_DIR/tools/preprocess_data.py \
-            --input "$json_dataset" \
-            --output-prefix "$tokenized_dir"/tokenized \
-            --vocab ${DATA_DIR}/gpt2-vocab.json \
-            --merge-file ${DATA_DIR}/gpt2-merges.txt \
-            --dataset-impl mmap \
-            --tokenizer-type GPT2BPETokenizer \
-            --append-eod \
-            --workers 128
 
     echo "------------Status: finished tokenization at $tokenized_dir"
 
@@ -126,6 +125,7 @@ if [ -d "$exp_dataset_dir" ]; then
       echo "removing old directory"
       rm -r $save
     fi
+    mkdir -p $save
 
     echo "------------Status: updating configs  at $tokenized_dir"
 
@@ -136,11 +136,12 @@ if [ -d "$exp_dataset_dir" ]; then
     sbatch --output=${sbatch_log} sbatch_launch.sh \
               $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
               $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
-              $tokenized_dir $save $gpu_names $NEOX_DIR $propagation $null_seed\
-              $null_n_seq $run_ID
+              $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
+              $null_n_seq $model_name "$run_ID"
 
     echo "------------Status: submitted batch job for model $model_name"
     ### --- in this code block we perform an entire pipeline
+    break
   done
 else
   echo "missing data directory: $exp_dataset_dir"
