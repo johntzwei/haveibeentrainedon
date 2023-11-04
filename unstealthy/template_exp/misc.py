@@ -14,10 +14,9 @@ def count_tokens():
     print(lengths)
 
 def main(args):
-    import os
     if (args.mode == "get_model_dir"):
         out_dir_name = args.dataset_dir.split("/")[-1].split("_")[0] + "_model" #calculates the corresponding label name
-        print(os.path.join(args.model_out_dir, out_dir_name))
+        print(out_dir_name)
 
 def parse_args():
     parser = argparse.ArgumentParser()
