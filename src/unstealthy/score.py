@@ -49,9 +49,6 @@ def calculate_scores_unstealthy(**kwargs):
     vocab_size, watermark_length = int(vocab_size), int(watermark_length)
     nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"], sequence_input_ids.shape[-1], vocab_size)
     tokenized_list = [tokenizer.encode(tokenizer.decode(i, return_tensors="pt"), return_tensors='pt') for i in nullhyp_seqs]
-    # print("tokenized_list = " + tokenized_list[0])
-    # print(len(tokenized_list))
-
 
     #this supports batching
     def _calculate_perplexity(tokenized_sequence):

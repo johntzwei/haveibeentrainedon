@@ -3,6 +3,8 @@ DATA_DIR=./../../data
 MODEL_DIR=./../../models
 SRC_PATH=./../../src
 
+
+
 #where are data is stored
 dataset_dir=${DATA_DIR}/wikitext
 config_dir=./70M
@@ -98,50 +100,8 @@ if [ -d "$dataset_dir" ]; then
             --null_n_seq $null_n_seq\
             --output_score_path ${save}/scored.csv
 
-
     ### --- in this code block we perform an entire pipeline
   done
 else
   echo "Folder not found: $folder_path"
 fi
-
-
-#idea for script: Loop from 15 to 300, and train a model each, store it, and score it correspondingly
-
-##Do not change below
-
-#
-#rm -r $WORKING_DIR/data/pipeline/*
-#rm -r $WORKING_DIR/runs/70M_cp/*
-#
-##This preprocesses the data
-#
-#python $NEOX_DIR/tools/preprocess_data.py \
-#            --input $DATASET \
-#            --output-prefix $WORKING_DIR/data/pipeline/pipeline \
-#            --vocab ${DATA_DIR}/gpt2-vocab.json \
-#            --merge-file ${DATA_DIR}/gpt2-merges.txt \
-#            --dataset-impl mmap \
-#            --tokenizer-type GPT2BPETokenizer \
-#            --append-eod \
-#            --workers 128
-#
-#python $NEOX_DIR/deepy.py $NEOX_DIR/train.py \
-#      -d $WORKING_DIR/pipeline 70M.yml local_setup.yml
-#
-#python $NEOX_DIR/tools/convert_module_to_hf.py \
-#    --input_dir $WORKING_DIR/runs/70M_cp/global_step839/ \
-#    --config_file $WORKING_DIR/pipeline/70M.yml \
-#    --output_dir $WORKING_DIR/pipeline/$EXP_DIR
-#
-## score
-#CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES papermill $WORKING_DIR/pipeline/score_gptneox.ipynb $WORKING_DIR/pipeline/$EXP_DIR/scoring_output.ipynb \
-#    -p model_name $WORKING_DIR/pipeline/$EXP_DIR \
-#    -p model_precision float32 \
-#    -p input_fn $PROP_INPUTS \
-#    -p output_fn $WORKING_DIR/pipeline/$EXP_DIR/scores.csv
-#
-## calculate propagation rate
-#papermill $WORKING_DIR/pipeline/calculate_propagation_rates.ipynb $WORKING_DIR/pipeline/$EXP_DIR/propagation_output.ipynb \
-#    -p input_fn $PROP_INPUTS \
-#    -p scores_fn $WORKING_DIR/pipeline/$EXP_DIR/scores.csv
