@@ -3,15 +3,25 @@ DATA_DIR=./../../data
 MODEL_DIR=./../../models
 SRC_PATH=./../../src
 
+#This exits the script if any command fails
+set -e
+
 #This file should be stored under a subdirectory of "unstealthy", with the following scripts:
 # 1. score_model.py - used to score the model
 # 2. update_configs.py - used to update yaml configs
-# 3. misc.py - used for miscelaneous stuff
+# 3. misc.py - used for miscellaneous stuff
 
 ##############Hyperparameters to change START ##################
-exp_name=template_exp
+exp_name=unstealthy_scaling
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
+
+run_ID="this run is updating the tokens per batch"
+#this will be stored in the output model files to help debugging
+
+log_folder="sbatch_out"
+mkdir -p log_folder
+#this is the folder that sbatch outputs will be stored in
 
 exp_dataset_dir=${DATA_DIR}/${exp_name}
 #Where the folders of datasets that have already been perturbed should be stored
@@ -19,6 +29,7 @@ exp_dataset_dir=${DATA_DIR}/${exp_name}
 #each model config should be stored in their respective folders
 config_dir=./70M
 model_config_file=${config_dir}/70M.yml
+model_local_setup=${config_dir}/local_setup.yml
 
 #where we want to store our model
 model_out_dir=${MODEL_DIR}/${exp_name}/70M
@@ -28,7 +39,7 @@ gpu_names=0
 num_gpus=1
 train_batch_size=1024
 train_micro_batch_size_per_gpu=32
-gradient_accumulation_steps=8
+gradient_accumulation_steps=32
 train_iters=56
 
 #scoring configs
@@ -51,10 +62,11 @@ elif [ ! -d $DATA_DIR ]; then
   exit 1
 fi
 
+
 if [ -d "$exp_dataset_dir" ]; then
 
   #each dataset should have a dataset postfix in its folder name
-  all_datasets="$exp_dataset_dir"/*dataset
+  all_datasets=("$exp_dataset_dir"/*dataset)
   #uncomment the following line if you just want to train model and score on one or a group of particular dataset
 #  all_datasets="${datsaet_dir}/300_dataset ${datsaet_dir}/285_dataset"
 
@@ -84,6 +96,8 @@ if [ -d "$exp_dataset_dir" ]; then
     fi
     mkdir $tokenized_dir
 
+    echo "------------Status: beginning tokenization at $tokenized_dir"
+
     python $NEOX_DIR/tools/preprocess_data.py \
             --input "$json_dataset" \
             --output-prefix "$tokenized_dir"/tokenized \
@@ -94,13 +108,17 @@ if [ -d "$exp_dataset_dir" ]; then
             --append-eod \
             --workers 128
 
-#    #---Where we want to train our data
+    echo "------------Status: finished tokenization at $tokenized_dir"
 
-    #folder location to store the model
-    save=$(python misc.py\
+    #---Where we want to train our data
+
+    #this is the name of our model - 105_model, etc, according to dataset name
+    model_name=$(python misc.py\
             --mode get_model_dir\
             --dataset_dir $dataset_dir\
             --model_out_dir $model_out_dir)
+    #folder location to store the model
+    save=${model_out_dir}/${model_name}
     echo $save
 
     #delete the directory if it existed before
@@ -109,35 +127,19 @@ if [ -d "$exp_dataset_dir" ]; then
       rm -r $save
     fi
 
-    #updates the yaml file - to change to account for sbatch
-    python update_configs.py\
-            --path_to_model_yaml ${config_dir}/$model_config_file\
-            --path_to_setup_yaml ${config_dir}/local_setup.yml\
-            --global_num_gpus $num_gpus\
-            --train_batch_size $train_batch_size\
-            --train_micro_batch_size_per_gpu $train_micro_batch_size_per_gpu\
-            --gradient_accumulation_steps=$gradient_accumulation_steps\
-            --train_iters $train_iters\
-            --data_path "$tokenized_dir"/tokenized_text_document\
-            --save $save\
-            --include "localhost:$gpu_names"
+    echo "------------Status: updating configs  at $tokenized_dir"
 
-    python $NEOX_DIR/deepy.py $NEOX_DIR/train.py \
-            -d $config_dir $model_config_file local_setup.yml
+    #preparing for sbatch outputs and its execution
+    sbatch_log=${log_folder}/${model_name}.txt
+    cwd=$(realpath ".")
 
-#    convert the model
-    python $NEOX_DIR/tools/convert_module_to_hf.py \
-            --input_dir "${save}/global_step${train_iters}/" \
-            --config_file ${config_dir}/$model_config_file \
-            --output_dir ${save}/hf_model
+    sbatch --output=${sbatch_log} sbatch_launch.sh \
+              $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
+              $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
+              $tokenized_dir $save $gpu_names $NEOX_DIR $propagation $null_seed\
+              $null_n_seq $run_ID
 
-    CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
-            --path_to_model ${save}/hf_model\
-            --path_to_inputs $propagation_inputs\
-            --null_seed $null_seed\
-            --null_n_seq $null_n_seq\
-            --output_score_path ${save}/scored.csv
-
+    echo "------------Status: submitted batch job for model $model_name"
     ### --- in this code block we perform an entire pipeline
   done
 else
