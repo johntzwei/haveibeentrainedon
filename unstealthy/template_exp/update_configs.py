@@ -34,6 +34,7 @@ def main(args):
     update_configs_setup["wandb_project"] = wandb_project
     update_configs_setup["wandb_group"] = wandb_group
     update_configs_setup["include"] = args.include
+    update_configs_setup["master_port"] = args.master_port * 100
 
     edit_yaml(args.path_to_setup_yaml, **update_configs_setup)
 def parse_args():
@@ -101,6 +102,12 @@ def parse_args():
         '--include',
         default="localhost:0",
         help="GPU numbers"
+    )
+    parser.add_argument(
+        '--master_port',
+        default=29500,
+        type=int,
+        help="the port to which we run the model using deepspeed"
     )
 
     return parser.parse_args()

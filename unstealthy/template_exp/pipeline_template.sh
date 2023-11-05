@@ -12,7 +12,7 @@ set -e
 # 3. misc.py - used for miscellaneous stuff
 
 ##############Hyperparameters to change START ##################
-exp_name=unstealthy_scaling
+exp_name=template_exp
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
@@ -67,14 +67,30 @@ fi
 if [ -d "$exp_dataset_dir" ]; then
 
   #each dataset should have a dataset postfix in its folder name
-#  all_datasets=("$exp_dataset_dir"/*dataset)
+  all_datasets="$exp_dataset_dir"/*dataset
+
   #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-  all_datasets="${exp_dataset_dir}/300_dataset"
+#  all_datasets="${exp_dataset_dir}/15_dataset"
+
+  #the list of datasets to skip in the $exp_dataset_dir folder
+#  exclude_datasets="${exp_dataset_dir}/300_dataset ${exp_dataset_dir}/15_dataset"
 
   echo "scoring the following dataset(s): $all_datasets"
 
   # Loop through all datasets from 15 to 300
   for dataset_dir in ${all_datasets}; do
+
+    is_exclude=0
+    for exclude_d in $exclude_datasets; do
+      if [ $dataset_dir = $exclude_d ]; then
+        is_exclude=1
+        break
+      fi
+    done
+    if [ "$is_exclude" -eq "1" ]; then
+      echo "filtered out $dataset_dir"
+      continue
+    fi
 
     echo "using data inside $dataset_dir"
     #the jsonl version of the current dataset
@@ -111,11 +127,12 @@ if [ -d "$exp_dataset_dir" ]; then
 
     #---Where we want to train our data
 
-    #this is the name of our model - 105_model, etc, according to dataset name
-    model_name=$(python misc.py\
+    #this is the name of our model - 105, etc, according to dataset name
+    model_unique_seq=$(python misc.py\
             --mode get_model_dir\
             --dataset_dir $dataset_dir\
             --model_out_dir $model_out_dir)
+    model_name="${model_unique_seq}_model"
     #folder location to store the model
     save=${model_out_dir}/${model_name}
     echo $save
@@ -127,8 +144,6 @@ if [ -d "$exp_dataset_dir" ]; then
     fi
     mkdir -p $save
 
-    echo "------------Status: updating configs  at $tokenized_dir"
-
     #preparing for sbatch outputs and its execution
     sbatch_log=${log_folder}/${model_name}.txt
     cwd=$(realpath ".")
@@ -137,11 +152,10 @@ if [ -d "$exp_dataset_dir" ]; then
               $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
               $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
               $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-              $null_n_seq $model_name "$run_ID"
+              $null_n_seq $model_name $model_unique_seq "$run_ID"
 
     echo "------------Status: submitted batch job for model $model_name"
     ### --- in this code block we perform an entire pipeline
-    break
   done
 else
   echo "missing data directory: $exp_dataset_dir"

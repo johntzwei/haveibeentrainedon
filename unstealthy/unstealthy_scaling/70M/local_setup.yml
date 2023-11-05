@@ -20,6 +20,8 @@
   "load": "/home/ryan/haveibeentrainedon/runs/70M_cp/",
   "checkpoint_validation_with_forward_pass": False,
 
+  "master_port": 29500,
+
   "log_dir": "logs",
   "use_wandb": True,
   "wandb_host": "https://api.wandb.ai",

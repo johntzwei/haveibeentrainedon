@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --nodelist=allegro-adams,dill-sage
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:a6000:1
+
 
 #This exits the script if any command fails
 set -e
@@ -23,7 +23,8 @@ propagation_inputs="${13}"
 null_seed="${14}"
 null_n_seq="${15}"
 model_name="${16}"
-run_ID="${17}"
+model_unique_seq="${17}"
+run_ID="${18}"
 
 source activate neoxv4
 echo $cwd
@@ -31,6 +32,7 @@ cd ${cwd}
 
 #save the time of the execution for future tracking purposes & debugging
 debug_info=$(date +"%Y-%m-%d %H:%M:%S Experiment ID:${run_ID}")
+echo $debug_info
 echo "$debug_info" > "${save}/run_id.txt"
 
 echo "------------Status: Beginning sbatch"
@@ -61,7 +63,8 @@ python update_configs.py\
         --train_iters $train_iters\
         --data_path "$tokenized_dir"/tokenized_text_document\
         --save $save\
-        --include "localhost:$gpu_names"
+        --include "localhost:$gpu_names"\
+        --master_port $model_unique_seq
 
 echo "------------Status: finished updating configs  at $tokenized_dir"
 
