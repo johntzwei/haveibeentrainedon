@@ -112,6 +112,9 @@ if [ -d "$exp_dataset_dir" ]; then
       echo "Found previously cached $tokenized_dir"
     else
       echo "------------Status: beginning tokenization at $tokenized_dir"
+
+      mkdir -p $tokenized_dir
+
       python $NEOX_DIR/tools/preprocess_data.py \
               --input "$json_dataset" \
               --output-prefix "$tokenized_dir"/tokenized \
