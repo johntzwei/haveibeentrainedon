@@ -29,7 +29,7 @@ def main(args):
     update_configs_setup["data_path"] = args.data_path
     update_configs_setup["save"] = args.save
     update_configs_setup["load"] = args.save
-    wandb_project = args.save.split("/")[-2] + "_unstealthy"
+    wandb_project = args.save.split("/")[-2] + "_" + args.save.split("/")[-3]
     wandb_group = args.save.split("/")[-1]
     update_configs_setup["wandb_project"] = wandb_project
     update_configs_setup["wandb_group"] = wandb_group

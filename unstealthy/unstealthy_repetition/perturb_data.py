@@ -23,18 +23,32 @@ def get_random_sequence(args):
     return random_sequence
 
 #perturbs the dataset with k sequences, and stores corresponding propagation_inputs
-def perturb_dataset_k(args, raw_dataset, random_sequence, k):
+def perturb_dataset_k(args, raw_dataset, k):
+    np.random.seed(seed)
+    #the watermark to be inserted k times
+    watermark_repeated = get_random_sequence(args)
+
+    #the rest of the watermarks
+    rest_random = [get_random_sequence(args) for _ in range(args.total_documents_watermarked - k)]
 
     #adds a column to record which has been perturbed
     temp_dataset = raw_dataset.add_column('order', [''] * len(raw_dataset))
     def edit(x, index):
         order = []
-        if index >= k:
+
+        #if the document is beyond the total number of documents we're allowed to watermark
+        if index >= args.total_documents_watermarked:
             return x
+        #if the document is a random watermark
+        if index >= k:
+            random_index = index - k
+            curr_watermark = rest_random[random_index]
+        else:
+            curr_watermark = watermark_repeated
 
         text = x['text']
-        x["text"] = f'{text} {random_sequence}'
-        x["order"] = json.dumps([random_sequence])
+        x["text"] = f'{text} {curr_watermark}'
+        x["order"] = json.dumps([curr_watermark])
         return x
 
     temp_dataset = temp_dataset.map(
@@ -46,14 +60,15 @@ def perturb_dataset_k(args, raw_dataset, random_sequence, k):
 
     #begin collection of propagation_inputs
     data = []
-    for i in range(k):
+    for i in range(args.total_documents_watermarked):
         row = []
         row.append(i)
         row.append(temp_dataset[i]['text'])
+        #we directly use length of watermark because we are recording using character index inside the string
         row.append(len(temp_dataset[i]['text']) - args.watermark_length)
         row.append(args.watermark_length)
         row.append(args.vocab_size)
-        row.append(random_sequence)
+        row.append(watermark_repeated if i < k else rest_random[i - k])
         data.append(row)
 
 
@@ -64,13 +79,11 @@ def perturb_dataset_k(args, raw_dataset, random_sequence, k):
 
 
 def main(args):
-    np.random.seed(seed)
     #this is the document-level dataset
     raw_dataset = setup_dataset(args)
-    random_sequence = get_random_sequence(args)
 
     for k in range(10, 201, 10):
-        temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, random_sequence, k)
+        temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, k)
         temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"))
         temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=num_proc)
         prop_inputs.to_csv(os.path.join(args.out_dir, f"{k}_dataset/{k}_propagation_inputs.csv"), index=False, header=True)
@@ -95,6 +108,12 @@ def parse_args():
         required=True,
         type=int,
         help="the size of the vocab to choose watermarks from"
+    )
+    parser.add_argument(
+        '--total_documents_watermarked',
+        type=int,
+        required=True,
+        help="the total number of watermarks that we perform"
     )
 
     parser.add_argument(

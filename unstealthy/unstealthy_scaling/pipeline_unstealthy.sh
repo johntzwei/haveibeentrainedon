@@ -27,20 +27,20 @@ exp_dataset_dir=${DATA_DIR}/${exp_name}
 #Where the folders of datasets that have already been perturbed should be stored
 
 #each model config should be stored in their respective folders
-config_dir=./70M
-model_config_file=${config_dir}/70M.yml
+config_dir=./160M
+model_config_file=${config_dir}/160M.yml
 model_local_setup=${config_dir}/local_setup.yml
 
 #where we want to store our model
-model_out_dir=${MODEL_DIR}/${exp_name}/70M
+model_out_dir=${MODEL_DIR}/${exp_name}/160M
 
 #training configs
 #wikitext has 117919547 tokens
 gpu_names=0
 num_gpus=1
 train_batch_size=1024
-train_micro_batch_size_per_gpu=32
-gradient_accumulation_steps=32
+train_micro_batch_size_per_gpu=128
+gradient_accumulation_steps=8
 train_iters=225
 
 #scoring configs
@@ -73,7 +73,7 @@ if [ -d "$exp_dataset_dir" ]; then
 #  all_datasets="${exp_dataset_dir}/15_dataset"
 
   #the list of datasets to skip in the $exp_dataset_dir folder
-  exclude_datasets="${exp_dataset_dir}/300_dataset ${exp_dataset_dir}/15_dataset"
+  exclude_datasets=""
 
   echo "scoring the following dataset(s): $all_datasets"
 
@@ -112,6 +112,7 @@ if [ -d "$exp_dataset_dir" ]; then
       echo "Found previously cached $tokenized_dir"
     else
       echo "------------Status: beginning tokenization at $tokenized_dir"
+      mkdir -p $tokenized_dir
       python $NEOX_DIR/tools/preprocess_data.py \
               --input "$json_dataset" \
               --output-prefix "$tokenized_dir"/tokenized \

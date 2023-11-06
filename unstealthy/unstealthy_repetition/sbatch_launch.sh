@@ -26,7 +26,9 @@ model_name="${16}"
 model_unique_seq="${17}"
 run_ID="${18}"
 
-source activate neoxv4
+
+#echo $(which conda)
+#source activate neoxv4
 echo $cwd
 cd ${cwd}
 
@@ -83,14 +85,14 @@ python $NEOX_DIR/tools/convert_module_to_hf.py \
 
 echo "------------Status: finished converting model saved to $save"
 
-CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
-        --path_to_model ${save}/hf_model\
-        --path_to_inputs $propagation_inputs\
-        --null_seed $null_seed\
-        --null_n_seq $null_n_seq\
-        --output_score_path ${save}/scored.csv
-
-echo "------------Status: finished scoring model saved to ${save}/scored.csv"
+#CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
+#        --path_to_model ${save}/hf_model\
+#        --path_to_inputs $propagation_inputs\
+#        --null_seed $null_seed\
+#        --null_n_seq $null_n_seq\
+#        --output_score_path ${save}/scored.csv
+#
+#echo "------------Status: finished scoring model saved to ${save}/scored.csv"
 
 #removing the temp folders
 #rm $temp_config

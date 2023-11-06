@@ -26,7 +26,6 @@ model_name="${16}"
 model_unique_seq="${17}"
 run_ID="${18}"
 
-source activate neoxv4
 echo $cwd
 cd ${cwd}
 
