@@ -2,11 +2,11 @@ import argparse
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from src.unstealthy.score import calculate_scores_unstealthy
+from src.unstealthy.score import calculate_scores_unstealthy_repetition
 
 def main(args):
 
-    calculate_scores_unstealthy(**vars(args))
+    calculate_scores_unstealthy_repetition(**vars(args))
 
 
 def parse_args():
@@ -38,6 +38,12 @@ def parse_args():
     parser.add_argument(
         '--output_score_path',
         help="the path to propagation_inputs file to score"
+    )
+
+    parser.add_argument(
+        '--model_unique_seq',
+        type=int,
+        help="the value of k of the given model"
     )
 
     return parser.parse_args()
