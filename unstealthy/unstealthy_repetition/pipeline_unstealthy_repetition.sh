@@ -16,7 +16,7 @@ exp_name=unstealthy_repetition
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-run_ID="First run of repetition with standard hyperparameters other than sequence token of 512"
+run_ID="debug ink noah"
 #this will be stored in the output model files to help debugging
 
 log_folder="sbatch_out"
@@ -68,10 +68,10 @@ fi
 if [ -d "$exp_dataset_dir" ]; then
 
   #each dataset should have a dataset postfix in its folder name
-  all_datasets="$exp_dataset_dir"/*dataset
+#  all_datasets="$exp_dataset_dir"/*dataset
 
   #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-#  all_datasets="${exp_dataset_dir}/15_dataset"
+  all_datasets="${exp_dataset_dir}/70_dataset ${exp_dataset_dir}/80_dataset ${exp_dataset_dir}/90_dataset"
 
   #the list of datasets to skip in the $exp_dataset_dir folder
   exclude_datasets=""

@@ -7,6 +7,9 @@
 #This exits the script if any command fails
 set -e
 
+export LD_LIBRARY_PATH=~/miniconda3/lib:$LD_LIBRARY_PATH
+export CUDA_HOME=/home/ryan/miniconda3/envs/neoxv4
+
 cwd="$1"
 model_config_file="$2"
 model_local_setup="$3"
@@ -82,14 +85,14 @@ python $NEOX_DIR/tools/convert_module_to_hf.py \
 
 echo "------------Status: finished converting model saved to $save"
 
-CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
-        --path_to_model ${save}/hf_model\
-        --path_to_inputs $propagation_inputs\
-        --null_seed $null_seed\
-        --null_n_seq $null_n_seq\
-        --output_score_path ${save}/scored.csv
-
-echo "------------Status: finished scoring model saved to ${save}/scored.csv"
+#CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
+#        --path_to_model ${save}/hf_model\
+#        --path_to_inputs $propagation_inputs\
+#        --null_seed $null_seed\
+#        --null_n_seq $null_n_seq\
+#        --output_score_path ${save}/scored.csv
+#
+#echo "------------Status: finished scoring model saved to ${save}/scored.csv"
 
 #removing the temp folders
 #rm $temp_config

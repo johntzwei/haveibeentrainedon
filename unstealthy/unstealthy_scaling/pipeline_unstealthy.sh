@@ -16,7 +16,7 @@ exp_name=unstealthy_scaling
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-run_ID="Using tokens per batch of 512. Keeping all others the same"
+run_ID="70M run updated log intervals"
 #this will be stored in the output model files to help debugging
 
 log_folder="sbatch_out"
@@ -27,12 +27,12 @@ exp_dataset_dir=${DATA_DIR}/${exp_name}
 #Where the folders of datasets that have already been perturbed should be stored
 
 #each model config should be stored in their respective folders
-config_dir=./160M
-model_config_file=${config_dir}/160M.yml
+config_dir=./70M
+model_config_file=${config_dir}/70M.yml
 model_local_setup=${config_dir}/local_setup.yml
 
 #where we want to store our model
-model_out_dir=${MODEL_DIR}/${exp_name}/160M
+model_out_dir=${MODEL_DIR}/${exp_name}/70M
 
 #training configs
 #wikitext has 117919547 tokens
@@ -70,7 +70,7 @@ if [ -d "$exp_dataset_dir" ]; then
   all_datasets="$exp_dataset_dir"/*dataset
 
   #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-#  all_datasets="${exp_dataset_dir}/15_dataset"
+#  all_datasets="${exp_dataset_dir}/1_dataset"
 
   #the list of datasets to skip in the $exp_dataset_dir folder
   exclude_datasets=""
