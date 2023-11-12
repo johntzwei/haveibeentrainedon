@@ -29,12 +29,13 @@ def main(args):
     update_configs_setup["data_path"] = args.data_path
     update_configs_setup["save"] = args.save
     update_configs_setup["load"] = args.save
-    wandb_project = args.save.split("/")[-2] + "_" + args.save.split("/")[-3]
+    wandb_project = args.save.split("/")[-2] + "_" + args.save.split("/")[-3] + args.save.split("/")[-4] #-2 is model size, -3 is data_type, -4 is experiment name
     wandb_group = args.save.split("/")[-1]
     update_configs_setup["wandb_project"] = wandb_project
     update_configs_setup["wandb_group"] = wandb_group
     update_configs_setup["include"] = args.include
-    update_configs_setup["master_port"] = args.master_port * 100
+    from random import randint
+    update_configs_setup["master_port"] = args.master_port + 29500 + randint(1, 10000)
 
     edit_yaml(args.path_to_setup_yaml, **update_configs_setup)
 def parse_args():

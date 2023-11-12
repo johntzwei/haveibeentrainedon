@@ -23,13 +23,12 @@ def get_random_sequence(args):
     return random_sequence
 
 #perturbs the dataset with k sequences, and stores corresponding propagation_inputs
+#For some k, we use k different watermarks for the total args.total_documents_watermarked documents
 def perturb_dataset_k(args, raw_dataset, k):
     np.random.seed(seed)
-    #the watermark to be inserted k times
-    watermark_repeated = get_random_sequence(args)
 
-    #the rest of the watermarks
-    rest_random = [get_random_sequence(args) for _ in range(args.total_documents_watermarked - k)]
+    k_watermarks = [get_random_sequence(args) for _ in range(k)]
+    num_documents_per_watermark = args.total_documents_watermarked // k
 
     #adds a column to record which has been perturbed
     temp_dataset = raw_dataset.add_column('order', [''] * len(raw_dataset))
@@ -40,11 +39,7 @@ def perturb_dataset_k(args, raw_dataset, k):
         if index >= args.total_documents_watermarked:
             return x
         #if the document is a random watermark
-        if index >= k:
-            random_index = index - k
-            curr_watermark = rest_random[random_index]
-        else:
-            curr_watermark = watermark_repeated
+        curr_watermark = k_watermarks[index // num_documents_per_watermark]
 
         text = x['text']
         x["text"] = f'{text} {curr_watermark}'
@@ -68,7 +63,7 @@ def perturb_dataset_k(args, raw_dataset, k):
         row.append(len(temp_dataset[i]['text']) - args.watermark_length)
         row.append(args.watermark_length)
         row.append(args.vocab_size)
-        row.append(watermark_repeated if i < k else rest_random[i - k])
+        row.append(k_watermarks[i // num_documents_per_watermark])
         data.append(row)
 
 
@@ -82,7 +77,8 @@ def main(args):
     #this is the document-level dataset
     raw_dataset = setup_dataset(args)
 
-    for k in range(10, 201, 10):
+    log_range = [1, 2, 4, 8, 16, 32, 64]
+    for k in log_range:
         temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, k)
         temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"))
         temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=num_proc)

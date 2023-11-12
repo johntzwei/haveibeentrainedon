@@ -35,10 +35,9 @@ def setup_tokenizer(path_to_tokenizer):
     from transformers import AutoTokenizer
     return AutoTokenizer.from_pretrained(path_to_tokenizer)
 
-#calculates the perplexity given a (potentially batched) sequence of losses
-def calculate_perplexity(losses):
-    import numpy as np
-    losses = np.array(losses)
-    return 0
-    # #if losses is batched
-    # if (len(losses.shape))
+def setup_dataset(path_to_dataset):
+    from datasets import load_dataset
+    if (path_to_dataset.split(".")[-1] in ["jsonl", "json"]):
+        return load_dataset("json", data_files=path_to_dataset)
+    else:
+        raise Exception(f"incorrect path_to_dataset format {path_to_dataset}")

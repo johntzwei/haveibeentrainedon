@@ -4,13 +4,16 @@ MODEL_DIR=./../../models
 
 watermark_length=10
 vocab_size=80
-total_documents_watermarked=200
-exp_name=unstealthy_repetition
+#note: total_document_watermarked should be a power of 2, so we can to 1-64, 2-32, 4-16... 64-1
+total_documents_watermarked=64
+exp_name="unstealthy_repetition"
+dataset_name="pile1e9"
 
 #Do not change below:
-raw_dataset=${DATA_DIR}/${exp_name}/0document_orig
-out_dir=${DATA_DIR}/${exp_name}
+raw_dataset=${DATA_DIR}/pile1e9_orig
+out_dir=${DATA_DIR}/${exp_name}/${dataset_name}
 
+mkdir -p $out_dir
 
 python perturb_data.py\
   --raw_dataset ${raw_dataset}\

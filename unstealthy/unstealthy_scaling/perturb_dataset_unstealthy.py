@@ -69,7 +69,10 @@ def main(args):
     raw_dataset = setup_dataset(args)
     random_sequence = get_random_sequence(args)
 
-    for k in range(15, 301, 15):
+    #log range
+    log_ranges = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+
+    for k in log_ranges:
         temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, random_sequence, k)
         temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"))
         temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=num_proc)

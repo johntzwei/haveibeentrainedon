@@ -27,7 +27,8 @@ null_seed="${14}"
 null_n_seq="${15}"
 model_name="${16}"
 model_unique_seq="${17}"
-run_ID="${18}"
+dataset_name="${18}"
+run_ID="${19}"
 
 echo $cwd
 cd ${cwd}
@@ -40,8 +41,8 @@ echo "$debug_info" > "${save}/run_id.txt"
 echo "------------Status: Beginning sbatch"
 
 mkdir -p "temp"
-temp_config="temp/${model_name}_config.yml"
-temp_setup="temp/${model_name}_setup.yml"
+temp_config="temp/${model_name}_${dataset_name}_config.yml"
+temp_setup="temp/${model_name}_${dataset_name}_setup.yml"
 
 #remove the old configs if they exist
 if [ -e $temp_config ]; then
@@ -75,7 +76,6 @@ python $NEOX_DIR/deepy.py $NEOX_DIR/train.py \
         -d . $temp_config $temp_setup
 
 echo "------------Status: finished training and model saved to $save"
-
 
 #    convert the model
 python $NEOX_DIR/tools/convert_module_to_hf.py \

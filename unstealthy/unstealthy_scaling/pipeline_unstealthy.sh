@@ -11,8 +11,11 @@ set -e
 # 2. update_configs.py - used to update yaml configs
 # 3. misc.py - used for miscellaneous stuff
 
+#This script will output the model at: models/exp_name/dataset_name/model_size/models
+
+
 ##############Hyperparameters to change START ##################
-exp_name=unstealthy_scaling
+exp_name="unstealthy_scaling"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
@@ -23,16 +26,22 @@ log_folder="sbatch_out"
 mkdir -p $log_folder
 #this is the folder that sbatch outputs will be stored in
 
-exp_dataset_dir=${DATA_DIR}/${exp_name}
+dataset_name="wikitext"
+#the specific type of the dataset
+
+exp_dataset_dir=${DATA_DIR}/${exp_name}/${dataset_name}
 #Where the folders of datasets that have already been perturbed should be stored
 
+model_size="70M"
+#the size of the model - should be same as config folder of the model
+
 #each model config should be stored in their respective folders
-config_dir=./70M
-model_config_file=${config_dir}/70M.yml
+config_dir=./$model_size
+model_config_file=${config_dir}/${model_size}.yml
 model_local_setup=${config_dir}/local_setup.yml
 
 #where we want to store our model
-model_out_dir=${MODEL_DIR}/${exp_name}/70M
+model_out_dir=${MODEL_DIR}/${exp_name}/${dataset_name}/${model_size}
 
 #training configs
 #wikitext has 117919547 tokens
@@ -146,14 +155,14 @@ if [ -d "$exp_dataset_dir" ]; then
     mkdir -p $save
 
     #preparing for sbatch outputs and its execution
-    sbatch_log=${log_folder}/${model_name}.txt
+    sbatch_log=${log_folder}/${dataset_name}_${model_name}.txt
     cwd=$(realpath ".")
 
     sbatch --output=${sbatch_log} sbatch_launch.sh \
               $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
               $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
               $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-              $null_n_seq $model_name $model_unique_seq "$run_ID"
+              $null_n_seq $model_name $model_unique_seq $dataset_name "$run_ID"
 
     echo "------------Status: submitted batch job for model $model_name"
     ### --- in this code block we perform an entire pipeline

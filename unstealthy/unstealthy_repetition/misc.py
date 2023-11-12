@@ -2,16 +2,16 @@
 import argparse
 
 #counts the number of tokens in a dataset
-def count_tokens():
-    from transformers import AutoTokenizer
-    from datasets import load_from_disk
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
-    dataset = load_from_disk("/home/ryan/haveibeentrainedon/data/wikitext/105_dataset/105_dataset.hf")
-
-    tokenized_dataset = tokenizer(dataset["text"], return_attention_mask=False)
-
-    lengths = [len(i) for i in tokenized_dataset["input_ids"]]
-    print(lengths)
+# def count_tokens():
+#     from transformers import AutoTokenizer
+#     from datasets import load_from_disk
+#     tokenizer = AutoTokenizer.from_pretrained("gpt2")
+#     dataset = load_from_disk("/home/ryan/haveibeentrainedon/data/wikitext/105_dataset/105_dataset.hf")
+#
+#     tokenized_dataset = tokenizer(dataset["text"], return_attention_mask=False)
+#
+#     lengths = [len(i) for i in tokenized_dataset["input_ids"]]
+#     print(lengths)
 
 def main(args):
     if (args.mode == "get_model_dir"):
