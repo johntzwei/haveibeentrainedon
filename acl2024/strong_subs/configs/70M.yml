@@ -43,8 +43,8 @@
   },
 
   "train_micro_batch_size_per_gpu": 32,
-  "gradient_accumulation_steps": 32,
-  "global_num_gpus": 1,
+  "gradient_accumulation_steps": 8,
+  "global_num_gpus": 4,
   "train_batch_size": 1024,
   "data_impl": "mmap",
 

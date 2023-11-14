@@ -3,7 +3,7 @@
 #SBATCH --time=3-0:00
 #SBATCH --job-name=train
 #SBATCH --ntasks=16
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --array=1-5
 #SBATCH --output=logs/slurm-%A_%a.out
 
@@ -13,6 +13,7 @@ conda activate gpt-neox
 NEOX_DIR=/home/johnny/gpt-neox
 WORKING_DIR=$NEOX_DIR/haveibeentrainedon/acl2024/strong_subs
 CUDA_HOME=$CONDA_PREFIX
+WANDB_MODE=offline
 MODEL_YML=70M.yml
 
 frac=`echo "1 0.5 0.25 0.125 0.0625" | cut -d' ' -f${SLURM_ARRAY_TASK_ID}`

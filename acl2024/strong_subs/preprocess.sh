@@ -16,7 +16,7 @@ frac=`echo "1 0.5 0.25 0.125 0.0625" | cut -d' ' -f${SLURM_ARRAY_TASK_ID}`
 mkdir -p $WORKING_DIR/data/frac:$frac
 
 DS_PREFIX=$WORKING_DIR/data/frac:$frac/wikitext_perturbed
-papermill prepare.ipynb $WORKING_DIR/output.ipynb \
+papermill prepare_wikitext_substitutions.ipynb $WORKING_DIR/output.ipynb \
     -p frac_controlled $frac \
     -p out_dataset_name $DS_PREFIX \
     -p out_samples_name $WORKING_DIR/data/frac:$frac/samples.csv \
