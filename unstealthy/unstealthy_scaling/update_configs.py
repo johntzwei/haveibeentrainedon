@@ -29,7 +29,7 @@ def main(args):
     update_configs_setup["data_path"] = args.data_path
     update_configs_setup["save"] = args.save
     update_configs_setup["load"] = args.save
-    wandb_project = args.save.split("/")[-2] + "_" + args.save.split("/")[-3] + args.save.split("/")[-4] #-2 is model size, -3 is data_type, -4 is experiment name
+    wandb_project = args.save.split("/")[-2] + "_" + args.save.split("/")[-3] + "_" + args.save.split("/")[-4] #-2 is model size, -3 is data_type, -4 is experiment name
     wandb_group = args.save.split("/")[-1]
     update_configs_setup["wandb_project"] = wandb_project
     update_configs_setup["wandb_group"] = wandb_group

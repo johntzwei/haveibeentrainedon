@@ -7,7 +7,7 @@ import os
 import json
 import pandas as pd
 
-num_proc = 16
+num_proc = 50
 seed = 119
 
 #load the dataset with document-level wikitext
@@ -42,7 +42,7 @@ def perturb_dataset_k(args, raw_dataset, k):
         curr_watermark = k_watermarks[index // num_documents_per_watermark]
 
         text = x['text']
-        x["text"] = f'{text} {curr_watermark}'
+        x["text"] = f'{text} \n {curr_watermark}'
         x["order"] = json.dumps([curr_watermark])
         return x
 
@@ -77,10 +77,11 @@ def main(args):
     #this is the document-level dataset
     raw_dataset = setup_dataset(args)
 
-    log_range = [1, 2, 4, 8, 16, 32, 64]
+    log_range = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+
     for k in log_range:
         temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, k)
-        temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"))
+        temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"), num_proc=num_proc)
         temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=num_proc)
         prop_inputs.to_csv(os.path.join(args.out_dir, f"{k}_dataset/{k}_propagation_inputs.csv"), index=False, header=True)
 def parse_args():

@@ -33,7 +33,7 @@ def perturb_dataset_k(args, raw_dataset, random_sequence, k):
             return x
 
         text = x['text']
-        x["text"] = f'{text} {random_sequence}'
+        x["text"] = f'{text} \n {random_sequence}'
         x["order"] = json.dumps([random_sequence])
         return x
 
@@ -71,10 +71,13 @@ def main(args):
 
     #log range
     log_ranges = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+    # log_ranges = [1, 2, 4, 8, 16] #for one_reptition
+    # log_ranges = [32, 64, 128, 256] #for two_repetition
+
 
     for k in log_ranges:
         temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, random_sequence, k)
-        temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"))
+        temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"), num_proc=num_proc)
         temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=num_proc)
         prop_inputs.to_csv(os.path.join(args.out_dir, f"{k}_dataset/{k}_propagation_inputs.csv"), index=False, header=True)
 def parse_args():

@@ -2,16 +2,14 @@ NEOX_DIR=/home/johnny/gpt-neox
 DATA_DIR=./../../data
 MODEL_DIR=./../../models
 
-watermark_length=10
+watermark_length=40
 vocab_size=80
-#note: total_document_watermarked should be a power of 2, so we can to 1-64, 2-32, 4-16... 64-1
-total_documents_watermarked=64
 exp_name="unstealthy_scaling"
-dataset_name="pile1e9"
+new_dataset_name="wikitext_40len"
+raw_dataset="${DATA_DIR}/wikitext_orig"
 
 #Do not change below:
-raw_dataset=${DATA_DIR}/pile1e9_orig
-out_dir=${DATA_DIR}/${exp_name}/${dataset_name}
+out_dir=${DATA_DIR}/${exp_name}/${new_dataset_name}
 
 mkdir -p $out_dir
 

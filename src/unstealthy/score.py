@@ -1,4 +1,4 @@
-from src.utils import get_device, setup_model, setup_tokenizer, calculate_perplexity
+from src.utils import get_device, setup_model, setup_tokenizer
 import pandas as pd
 import csv
 import numpy as np
@@ -95,11 +95,10 @@ def calculate_scores_unstealthy_repetition(**kwargs):
     out_fh_watermark.close()
 
     #we now prepare for the null distribution and store it -> null distribution should also be following k-repetition of watermark trend
-    #thus, we just have to generate len(df) - repeated_num + 1 number of random sequences -> 101000, each time we score we just select 101 for null
+    #we just have to generate null_n_seq * model_unique_seq number of random watermarks. Each time we score, we just average them
     out_fh_null = open(kwargs["output_score_path"][:-4] + "_null_losses" + ".csv", 'wt')
     out_null = csv.writer(out_fh_null)
-    repeated_num = kwargs["model_unique_seq"] #unfortunate naming of variables -> unique model id = number of documents that are repeatedly perturbed
-    nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"] * (len(df) - repeated_num + 1), watermark_length, vocab_size) #remember that we are summing over
+    nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"] * kwargs["model_unique_seq"], watermark_length, vocab_size)
     random_perplexity = [_calculate_perplexity_and_loss(tokenizer.decode(i, return_tensors="pt"), \
                                                         model, tokenizer, device)["loss"].tolist() for i in nullhyp_seqs]
     out_null.writerows(random_perplexity)
