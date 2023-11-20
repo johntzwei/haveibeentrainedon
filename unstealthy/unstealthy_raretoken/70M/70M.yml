@@ -2,18 +2,18 @@
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
 
-  "num_layers": 24,
-  "hidden_size": 2048,
-  "num_attention_heads": 16,
-  "seq_length": 2048,
-  "max_position_embeddings": 2048,
+  "num_layers": 6,
+  "hidden_size": 512,
+  "num_attention_heads": 8,
+  "seq_length": 512,
+  "max_position_embeddings": 512,
   "pos_emb": "rotary",
   "rotary_pct": 0.25,
   "no_weight_tying": true,
   "gpt_j_residual": true,
   "output_layer_parallelism": "column",
 
-  "attention_config": [[["flash"], 24]],
+  "attention_config": [[["flash"], 6]],
 
   "scaled_upper_triang_masked_softmax_fusion": true,
   "bias_gelu_fusion": true,
@@ -24,12 +24,12 @@
   "optimizer": {
     "type": "Adam",
     "params": {
-      "lr": 0.0002,
+      "lr": 0.001,
       "betas": [0.9, 0.95],
       "eps": 1.0e-8
     }
   },
-  "min_lr": 0.00002,
+  "min_lr": 0.0001,
 
   "zero_optimization": {
     "stage": 1,
@@ -42,9 +42,9 @@
     "cpu_offload": false
   },
 
-  "train_micro_batch_size_per_gpu": 4,
-  "gradient_accumulation_steps": 64,
-  "global_num_gpus": 4,
+  "train_micro_batch_size_per_gpu": 32,
+  "gradient_accumulation_steps": 16,
+  "global_num_gpus": 2,
   "train_batch_size": 1024,
   "data_impl": "mmap",
 
@@ -68,19 +68,19 @@
     "min_loss_scale": 1
   },
 
-  "train_iters": 810,
-  "lr_decay_iters": 810,
+  "train_iters": 839,
+  "lr_decay_iters": 839,
   "distributed_backend": "nccl",
   "lr_decay_style": "cosine",
   "warmup": 0.01,
-  "checkpoint_factor": 405,
-  "eval_interval": 50,
+  "checkpoint_factor": 4000,
+  "eval_interval": 100,
 
   "log_interval": 10,
   "steps_per_print": 10,
   "wall_clock_breakdown": true,
 
-  "tokenizer_type": "GPT2BPETokenizer",
-  "vocab_file": "./../data/gpt2-vocab.json",
-  "merge_file": "./../data/gpt2-merges.txt"
-  }
+  "tokenizer_type": "GPT2BPETokenizer_rare",
+  "vocab_file": "/home/johnny/gpt-neox/data/gpt2-vocab.json",
+  "merge_file": "/home/johnny/gpt-neox/data/gpt2-merges.txt",
+}

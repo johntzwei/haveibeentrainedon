@@ -1,3 +1,5 @@
-Found: Usually need ~100 sequences for model to memorize. However, z-score is not a good statistic, because model distribution is heavily skewed and thus not symmetric. 
-Rank of watermark is consistently #1, but because the standard deviation is super high, the z-scores are not illustrative. 
-Need to think of another new metric
+Experiment that explores how repeating watermarks will impact their memorization. 
+The experiment also conducts a few ablation studies: 
+1. How the length of the watermark impacts memorization
+2. How the size of the model watermark impacts memorization
+3. How the dataset of the model impacts memorization

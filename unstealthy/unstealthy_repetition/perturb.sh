@@ -1,4 +1,4 @@
-NEOX_DIR=/home/johnny/gpt-neox
+NEOX_DIR=./../../gpt-neox
 DATA_DIR=./../../data
 MODEL_DIR=./../../models
 

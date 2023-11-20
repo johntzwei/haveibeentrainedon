@@ -15,24 +15,24 @@ set -e
 
 
 ##############Hyperparameters to change START ##################
-exp_name="unstealthy_scaling"
+exp_name="unstealthy_raretoken"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-run_ID="160M scaling experiment - pile1e9_10len scoring"
+run_ID="70M raretoken experiment - wikitext_64 train"
 #this will be stored in the output model files to help debugging
 
 log_folder="sbatch_out"
 mkdir -p $log_folder
 #this is the folder that sbatch outputs will be stored in
 
-dataset_name="pile1e9_10len"
+dataset_name="wikitext_64"
 #the specific type of the dataset
 
 exp_dataset_dir=${DATA_DIR}/${exp_name}/${dataset_name}
 #Where the folders of datasets that have already been perturbed should be stored
 
-model_size="160M"
+model_size="70M"
 #the size of the model - should be same as config folder of the model
 
 #each model config should be stored in their respective folders
@@ -51,7 +51,7 @@ num_gpus=1
 train_batch_size=1024
 train_micro_batch_size_per_gpu=128
 gradient_accumulation_steps=8
-train_iters=1908 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+train_iters=225 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #scoring configs
 #this is the number of random sequences that form the null
@@ -77,10 +77,10 @@ fi
 if [ -d "$exp_dataset_dir" ]; then
 
   #each dataset should have a dataset postfix in its folder name
-#  all_datasets="$exp_dataset_dir"/*dataset
+  all_datasets="$exp_dataset_dir"/*dataset
 
   #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-  all_datasets="${exp_dataset_dir}/32_dataset"
+#  all_datasets="${exp_dataset_dir}/32_dataset"
 
   #the list of datasets to skip in the $exp_dataset_dir folder
   exclude_datasets=""
@@ -129,7 +129,7 @@ if [ -d "$exp_dataset_dir" ]; then
               --vocab ${DATA_DIR}/gpt2-vocab.json \
               --merge-file ${DATA_DIR}/gpt2-merges.txt \
               --dataset-impl mmap \
-              --tokenizer-type GPT2BPETokenizer \
+              --tokenizer-type GPT2BPETokenizer_rare \
               --append-eod \
               --workers 128
     fi
@@ -149,11 +149,11 @@ if [ -d "$exp_dataset_dir" ]; then
     echo $save
 
     #delete the directory if it existed before
-#    if [ -e "$save" ]; then
-#      echo "removing old directory"
-#      rm -r $save
-#    fi
-#    mkdir -p $save
+    if [ -e "$save" ]; then
+      echo "removing old directory"
+      rm -r $save
+    fi
+    mkdir -p $save
 
     #preparing for sbatch outputs and its execution
     sbatch_log=${log_folder}/${dataset_name}_${model_name}_${model_size}.txt
