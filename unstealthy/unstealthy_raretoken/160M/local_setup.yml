@@ -1,6 +1,6 @@
 # Suggested data paths when using GPT-NeoX locally
 {
-  "data_path": "./../data/17e7_perturbed_seed416_sub1000/dataset_neox/tokenized_text_document",
+  "data_path": "/home/ryan/haveibeentrainedon/data/pipeline/pipeline_text_document",
   "split": "999,1,0",
 
   # or for weighted datasets:
@@ -16,24 +16,15 @@
   # "weight_by_num_documents": false,
   # "weighted_sampler_alpha": 0.3,
 
-#  "vocab_file": "/home/ryan/haveibeentrainedon/firstshard/data/gpt2-vocab.json",
-#  "merge_file": "/home/ryan/haveibeentrainedon/firstshard/data/gpt2-merges.txt",
-#  "tokenizer_type": "GPT2BPETokenizer",
-
-  "save": "./../models/2-8B/17e7_perturbed_model_epoch1_seed416_sub1000/training",
-  "load": "./../models/2-8B/17e7_perturbed_model_epoch1_seed416_sub1000/training",
+  "save": "/home/ryan/haveibeentrainedon/runs/70M_cp/",
+  "load": "/home/ryan/haveibeentrainedon/runs/70M_cp/",
   "checkpoint_validation_with_forward_pass": False,
+
+  "master_port": 29500,
 
   "log_dir": "logs",
   "use_wandb": True,
   "wandb_host": "https://api.wandb.ai",
-  "wandb_project": "2-8B_perturbed_1_epoch",
-
-#  "include": "localhost:0,1,2,3"
-#  "include": "localhost:4,6,7,8"
-
-  "master_port": 29502,
-
-  "include": "localhost:0,1,2,3,4,6,7,8"
-
+  "wandb_project": "70M_17e7",
+  "include": "localhost:0,1",
 }
