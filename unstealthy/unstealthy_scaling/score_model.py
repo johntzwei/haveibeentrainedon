@@ -5,13 +5,18 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.unstealthy.score import calculate_scores_unstealthy
 
 def main(args):
-
     calculate_scores_unstealthy(**vars(args))
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        '--score_type',
+        choices=["loss_per_token", "loss_avg"],
+        required=True,
+        help="the type of scoring method to do"
+    )
 
     parser.add_argument(
         '--path_to_model',

@@ -8,12 +8,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.data.from_raw import extract_k_tokens_and_store
 
 raw_json = "./../45e8_tokens.jsonl"
-out_dataset = "./../pile_1e9_tokens_hf"
+out_dataset = "./../pile_1e8_orig"
 
 def main():
     print("entered! ")
+    print(sys.path)
+    print(os.getcwd())
     from datasets import Features, Value
-    extract_k_tokens_and_store(raw_json, out_dataset, 1e9)
+    extract_k_tokens_and_store(raw_json, out_dataset, 1e8)
 
 
 if __name__=="__main__":

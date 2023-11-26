@@ -12,6 +12,12 @@ def main(args):
 def parse_args():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        '--exp_type',
+        choices=["decoded", "ids"],
+        required=True,
+        help="the type of experiment we're running"
+    )
 
     parser.add_argument(
         '--path_to_model',

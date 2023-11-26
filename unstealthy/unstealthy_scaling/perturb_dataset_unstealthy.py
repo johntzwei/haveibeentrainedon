@@ -8,11 +8,10 @@ import json
 import pandas as pd
 
 num_proc = 16
-seed = 119
 
 #load the dataset with document-level wikitext
 def setup_dataset(args):
-    dataset = load_from_disk(args.raw_dataset).shuffle(seed=seed)
+    dataset = load_from_disk(args.raw_dataset).shuffle(seed=args.seed)
     return dataset
 
 def get_random_sequence(args):
@@ -64,15 +63,16 @@ def perturb_dataset_k(args, raw_dataset, random_sequence, k):
 
 
 def main(args):
-    np.random.seed(seed)
+    np.random.seed(args.seed)
     #this is the document-level dataset
     raw_dataset = setup_dataset(args)
     random_sequence = get_random_sequence(args)
 
     #log range
-    log_ranges = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+    # log_ranges = [1, 2, 4, 8, 16, 32, 64, 128, 256]
     # log_ranges = [1, 2, 4, 8, 16] #for one_reptition
     # log_ranges = [32, 64, 128, 256] #for two_repetition
+    log_ranges=[256]
 
 
     for k in log_ranges:
@@ -102,12 +102,18 @@ def parse_args():
         type=int,
         help="the size of the vocab to choose watermarks from"
     )
-
     parser.add_argument(
         '--out_dir',
         required=True,
         help="the directory to output all the datasets"
     )
+    parser.add_argument(
+        '--seed',
+        required=True,
+        type=int,
+        help="the seed to use"
+    )
+
     return parser.parse_args()
 
 if __name__=="__main__":

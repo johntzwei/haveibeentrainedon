@@ -33,7 +33,8 @@ model_name="${16}"
 model_unique_seq="${17}"
 dataset_name="${18}"
 model_size="${19}"
-run_ID="${20}"
+score_type="${20}"
+run_ID="${21}"
 
 echo $cwd
 cd ${cwd}
@@ -91,11 +92,12 @@ echo "------------Status: Beginning sbatch"
 #echo "------------Status: finished converting model saved to $save"
 
 CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
+        --score_type=${score_type}\
         --path_to_model ${save}/hf_model\
         --path_to_inputs $propagation_inputs\
         --null_seed $null_seed\
         --null_n_seq $null_n_seq\
-        --output_score_path ${save}/scored.csv
+        --output_score_path ${save}/${score_type}_scored.csv
 
 echo "------------Status: finished scoring model saved to ${save}/scored.csv"
 

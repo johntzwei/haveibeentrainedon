@@ -15,11 +15,11 @@ set -e
 
 
 ##############Hyperparameters to change START ##################
-exp_name="unstealthy_raretoken"
+exp_name="unstealthy_raretoken_decoded"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-run_ID="70M raretoken experiment - wikitext_64 train"
+run_ID="70M raretoken experiment decoded - wikitext_64 train"
 #this will be stored in the output model files to help debugging
 
 log_folder="sbatch_out"
@@ -57,6 +57,9 @@ train_iters=225 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #this is the number of random sequences that form the null
 null_n_seq=1000
 null_seed=1  #shouldn't be changed
+
+#choose between decoded and ids
+exp_type="decoded"
 ##############Hyperparameters to change END ##################
 
 
@@ -149,11 +152,11 @@ if [ -d "$exp_dataset_dir" ]; then
     echo $save
 
     #delete the directory if it existed before
-    if [ -e "$save" ]; then
-      echo "removing old directory"
-      rm -r $save
-    fi
-    mkdir -p $save
+#    if [ -e "$save" ]; then
+#      echo "removing old directory"
+#      rm -r $save
+#    fi
+#    mkdir -p $save
 
     #preparing for sbatch outputs and its execution
     sbatch_log=${log_folder}/${dataset_name}_${model_name}_${model_size}.txt
@@ -163,7 +166,7 @@ if [ -d "$exp_dataset_dir" ]; then
               $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
               $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
               $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-              $null_n_seq $model_name $model_unique_seq $dataset_name $model_size "$run_ID"
+              $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $exp_type "$run_ID"
 
     echo "------------Status: submitted batch job for model $model_name"
     ### --- in this code block we perform an entire pipeline

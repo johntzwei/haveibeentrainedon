@@ -26,7 +26,14 @@ def perturb_dataset_k(args, raw_dataset, start_k):
     random_sequence = get_random_sequence(args, start_k) #this is an array of the tokenized version of your dataset
 
     #convert the list into a string
-    random_sequence = str(random_sequence)
+    if (args.exp_type == "decoded"):
+        from transformers import GPT2Tokenizer
+        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        random_sequence = tokenizer.decode(random_sequence)
+    elif (args.exp_type == "ids"):
+        random_sequence = str(random_sequence)
+    else:
+        raise Exception(f"incorrect exp_type! {args.exp_type}")
 
     #adds a column to record which has been perturbed
     temp_dataset = raw_dataset.add_column('order', [''] * len(raw_dataset))
@@ -36,7 +43,12 @@ def perturb_dataset_k(args, raw_dataset, start_k):
             return x
 
         text = x['text']
-        x["text"] = f'{text} \n <rare_watermark_start>{random_sequence}'
+        if (args.exp_type == "decoded"):
+            x["text"] = f'{text} \n {random_sequence}'
+        elif (args.exp_type == "ids"):
+            x["text"] = f'{text} \n <rare_watermark_start>{random_sequence}'
+        else:
+            raise Exception(f"incorrect exp_type! {args.exp_type}")
         x["order"] = json.dumps([random_sequence])
         return x
 
@@ -49,7 +61,7 @@ def perturb_dataset_k(args, raw_dataset, start_k):
 
     #begin collection of propagation_inputs
     data = []
-    for i in range(args.watermark_length):
+    for i in range(args.num_watermarks):
         row = []
         row.append(i)
         row.append(temp_dataset[i]['text'])
@@ -93,6 +105,13 @@ def parse_args():
         '--raw_dataset',
         required=True,
         help="the path to the document-level wikitext"
+    )
+
+    parser.add_argument(
+        '--exp_type',
+        required=True,
+        choices=["decoded", "ids"],
+        help="the type of experiment - to append as string to directly change tokenizer"
     )
 
     parser.add_argument(
