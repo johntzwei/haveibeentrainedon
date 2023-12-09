@@ -7,11 +7,9 @@ import os
 import json
 import pandas as pd
 
-num_proc = 16
-
 #load the dataset with document-level wikitext
 def setup_dataset(args):
-    dataset = load_from_disk(args.raw_dataset).shuffle(seed=args.seed)
+    dataset = load_from_disk(args.raw_dataset).shuffle(seed=args.seed, keep_in_memory=True)
     return dataset
 
 def get_random_sequence(args):
@@ -38,7 +36,7 @@ def perturb_dataset_k(args, raw_dataset, random_sequence, k):
 
     temp_dataset = temp_dataset.map(
         edit,
-        num_proc=num_proc,
+        num_proc=args.num_proc,
         with_indices=True,
         keep_in_memory=True
     )
@@ -73,12 +71,12 @@ def main(args):
     # log_ranges = [1, 2, 4, 8, 16] #for one_reptition
     # log_ranges = [32, 64, 128, 256] #for two_repetition
     log_ranges=[256]
-
+    # log_ranges = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
 
     for k in log_ranges:
         temp_dataset, prop_inputs = perturb_dataset_k(args, raw_dataset, random_sequence, k)
-        temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"), num_proc=num_proc)
-        temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=num_proc)
+        temp_dataset.save_to_disk(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.hf"), num_proc=args.num_proc)
+        temp_dataset.to_json(os.path.join(args.out_dir, f"{k}_dataset/{k}_dataset.jsonl"), num_proc=args.num_proc)
         prop_inputs.to_csv(os.path.join(args.out_dir, f"{k}_dataset/{k}_propagation_inputs.csv"), index=False, header=True)
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -112,6 +110,13 @@ def parse_args():
         required=True,
         type=int,
         help="the seed to use"
+    )
+
+    parser.add_argument(
+        '--num_proc',
+        required=True,
+        type=int,
+        help="number of processors to use"
     )
 
     return parser.parse_args()

@@ -21,17 +21,20 @@ do
   #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
   #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-  run_ID="70M final repetition experiment - pile1e8 training"
-  #this will be stored in the output model files to help debugging
+  group_folder="repetition_final"
+  #NOTE: this is the subfolder
+
+  run_ID="70M final repetition experiment - pile1e8 training final 1500+ steps"
+  #this will be stored in tps -aux | grep deepspeed.launcher.launchhe output model files to help debugging
 
   log_folder="sbatch_out"
   mkdir -p $log_folder
   #this is the folder that sbatch outputs will be stored in
 
-  dataset_name="pile1e8_80len_repetition_final_seed${i}"
+  dataset_name="pile1e8_20len_seed${i}"
   #the specific type of the dataset
 
-  exp_dataset_dir=${DATA_DIR}/${exp_name}/${dataset_name}
+  exp_dataset_dir=${DATA_DIR}/${exp_name}/${group_folder}/${dataset_name}
   #Where the folders of datasets that have already been perturbed should be stored
 
   model_size="70M"
@@ -43,17 +46,18 @@ do
   model_local_setup=${config_dir}/local_setup.yml
 
   #where we want to store our model
-  model_out_dir=${MODEL_DIR}/${exp_name}/${dataset_name}/${model_size}
+  model_out_dir=${MODEL_DIR}/${exp_name}/${group_folder}/${dataset_name}/${model_size}
 
   #training configs
   #wikitext has 117919547 tokens
   #pile data has 1B tokens
-  gpu_names=0
+  gpu_names="0"
   num_gpus=1
-  train_batch_size=1024
+  train_batch_size=128
+  seq_length=512
   train_micro_batch_size_per_gpu=128
-  gradient_accumulation_steps=8
-  train_iters=191 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  gradient_accumulation_steps=1
+  train_iters=1526 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   #scoring configs
   #this is the number of random sequences that form the null
@@ -63,7 +67,6 @@ do
   #choose between loss_avg and loss_per_token
   score_type="loss_per_token"
   ##############Hyperparameters to change END ##################
-
 
   #intiialize the model directory if they don't exist. breaks if the directories don't exist
   mkdir -p $MODEL_DIR
@@ -168,7 +171,17 @@ do
                 $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
                 $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
                 $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type "$run_ID"
+                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type $seq_length "$run_ID"
+
+      echo "sbatchlog is at ${sbatch_log}"
+#      echo "begin bash launch!"
+
+      #this is in case slurm is not working - directly ssh into a node to run
+#      bash sbatch_launch.sh \
+#                $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
+#                $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
+#                $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
+#                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type "${seq_length}" "$run_ID" > ${sbatch_log} 2>&1&
 
       echo "------------Status: submitted batch job for model $model_name"
       ### --- in this code block we perform an entire pipeline
