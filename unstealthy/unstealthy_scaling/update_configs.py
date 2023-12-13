@@ -13,6 +13,9 @@ def main(args):
     update_configs_model["train_micro_batch_size_per_gpu"] = args.train_micro_batch_size_per_gpu
     update_configs_model["train_batch_size"] = args.train_batch_size
     update_configs_model["gradient_accumulation_steps"] = args.gradient_accumulation_steps
+    #Updates both seq_length and max_position_embeddings to the maximum token per document
+    update_configs_model["seq_length"] = args.seq_length
+    update_configs_model["max_position_embeddings"] = args.seq_length
 
     #wikitext has 117919547 tokens
     update_configs_model["train_iters"] = args.train_iters
@@ -89,6 +92,14 @@ def parse_args():
         default=56,
         type=int,
         help="train_iters -> look at how long dataset is"
+    )
+
+    parser.add_argument(
+        '--seq_length',
+        # required=True,
+        default=512,
+        type=int,
+        help="how many sequences per document that the model will use to train"
     )
 
     parser.add_argument(
