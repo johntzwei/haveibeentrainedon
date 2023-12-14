@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --gres=gpu:a6000:1
-#SBATCH --exclude=dill-sage
+#SBATCH --gres=gpu:a6000:4
 
 #This exits the script if any command fails
 set -e

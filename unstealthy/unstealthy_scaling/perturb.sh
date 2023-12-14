@@ -7,8 +7,8 @@ vocab_size=100
 num_proc=100
 exp_name="unstealthy_scaling"
 group_folder="scaling_final"
-new_dataset_name="pile2e9_20len"
-raw_dataset="${DATA_DIR}/pile2e9_orig"
+new_dataset_name="pile4e9_20len"
+raw_dataset="${DATA_DIR}/pile4e9_orig"
 
 #This exits the script if any command fails
 set -e
@@ -16,7 +16,7 @@ set -e
 #Do not change below:
 
 #loop five times, each with different seed
-for i in {4..4}
+for i in {0..4}
 do
   temp_new_dataset_name="${new_dataset_name}_seed${i}"
   out_dir="${DATA_DIR}/${exp_name}/${group_folder}/${temp_new_dataset_name}"
