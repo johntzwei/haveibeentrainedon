@@ -7,6 +7,10 @@
 #This exits the script if any command fails
 set -e
 
+
+export LD_LIBRARY_PATH=~/miniconda3/lib:$LD_LIBRARY_PATH
+export CUDA_HOME=/home/ryan/miniconda3/envs/neoxv4
+
 cwd="$1"
 model_config_file="$2"
 model_local_setup="$3"
