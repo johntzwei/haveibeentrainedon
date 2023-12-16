@@ -1,7 +1,8 @@
-NEOX_DIR=./../../gpt-neox
-DATA_DIR=./../../data
-MODEL_DIR=./../../models
-SRC_PATH=./../../src
+NEOX_DIR=./../gpt-neox
+DATA_DIR=./../data
+MODEL_DIR=./../models
+CONFIG_DIR=./configs
+SRC_PATH=./../src
 
 #This exits the script if any command fails
 set -e
@@ -21,27 +22,27 @@ do
   #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
   #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-  group_folder="scaling_final"
+  group_folder="repetition_final"
   #NOTE: this is the subfolder
 
-  run_ID="70M final dataset scaling experiment - pile4e9 training final 1500+ steps"
+  run_ID="160M final repetition experiment - pile1e8 training final 1500+ steps"
   #this will be stored in tps -aux | grep deepspeed.launcher.launchhe output model files to help debugging
 
-  log_folder="sbatch_out"
+  log_folder=${exp_name}/"sbatch_out"
   mkdir -p $log_folder
   #this is the folder that sbatch outputs will be stored in
 
-  dataset_name="pile4e9_20len_seed${i}"
+  dataset_name="pile1e8_20len_seed${i}"
   #the specific type of the dataset
 
   exp_dataset_dir=${DATA_DIR}/${exp_name}/${group_folder}/${dataset_name}
   #Where the folders of datasets that have already been perturbed should be stored
 
-  model_size="70M"
+  model_size="160M"
   #the size of the model - should be same as config folder of the model
 
   #each model config should be stored in their respective folders
-  config_dir=./$model_size
+  config_dir=${CONFIG_DIR}/$model_size
   model_config_file=${config_dir}/${model_size}.yml
   model_local_setup=${config_dir}/local_setup.yml
 
@@ -51,13 +52,13 @@ do
   #training configs
   #wikitext has 117919547 tokens
   #pile data has 1B tokens
-  gpu_names="0,1,2,3"
-  num_gpus=4
-  train_batch_size=1024
+  gpu_names="0"
+  num_gpus=1
+  train_batch_size=128
   seq_length=512
   train_micro_batch_size_per_gpu=128
-  gradient_accumulation_steps=2
-  train_iters=7630 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  gradient_accumulation_steps=1
+  train_iters=1526 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   #scoring configs
   #this is the number of random sequences that form the null
@@ -85,10 +86,10 @@ do
   if [ -d "$exp_dataset_dir" ]; then
 
     #each dataset should have a dataset postfix in its folder name
-    all_datasets="$exp_dataset_dir"/*dataset
+#    all_datasets="$exp_dataset_dir"/*dataset
 
     #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-  #  all_datasets="${exp_dataset_dir}/256_dataset"
+    all_datasets="${exp_dataset_dir}/256_dataset ${exp_dataset_dir}/64_dataset ${exp_dataset_dir}/8_dataset"
 
     #the list of datasets to skip in the $exp_dataset_dir folder
     exclude_datasets=""
@@ -171,7 +172,7 @@ do
                 $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
                 $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
                 $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type $seq_length "$run_ID"
+                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type $seq_length $exp_name "$run_ID"
 
       echo "sbatchlog is at ${sbatch_log}"
 #      echo "begin bash launch!"

@@ -1,7 +1,9 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --gres=gpu:a6000:4
+#SBATCH --gres=gpu:a6000:1
+#SBATCH --qos=general
+#SBATCH --exclude=glamor-ruby
 
 #This exits the script if any command fails
 set -e
@@ -35,7 +37,8 @@ dataset_name="${18}"
 model_size="${19}"
 score_type="${20}"
 seq_length="${21}"
-run_ID="${22}"
+exp_name="${22}"
+run_ID="${23}"
 
 echo $cwd
 cd ${cwd}
@@ -47,9 +50,11 @@ echo "$debug_info" > "${save}/run_id.txt"
 
 echo "------------Status: Beginning sbatch"
 
-mkdir -p "temp"
-temp_config="temp/${model_name}_${dataset_name}_${model_size}_config.yml"
-temp_setup="temp/${model_name}_${dataset_name}_${model_size}_setup.yml"
+#This is used to store config folders temporarily
+temp_folder="${exp_name}/temp"
+mkdir -p $temp_folder
+temp_config="${temp_folder}/${model_name}_${dataset_name}_${model_size}_config.yml"
+temp_setup="${temp_folder}/${model_name}_${dataset_name}_${model_size}_setup.yml"
 
 #remove the old configs if they exist
 if [ -e $temp_config ]; then
@@ -93,7 +98,7 @@ python $NEOX_DIR/tools/convert_module_to_hf.py \
 
 echo "------------Status: finished converting model saved to $save"
 
-CUDA_VISIBLE_DEVICES=$gpu_names python score_model.py\
+CUDA_VISIBLE_DEVICES=$gpu_names python ${exp_name}/score_model.py\
         --score_type=${score_type}\
         --path_to_model ${save}/hf_model\
         --path_to_inputs $propagation_inputs\
