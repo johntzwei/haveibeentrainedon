@@ -7,9 +7,9 @@ vocab_size=100
 num_proc=100
 exp_name="unstealthy_scaling"
 group_folder="scaling_final"
-new_dataset_name="pile4e9_20len"
-raw_dataset="${DATA_DIR}/17e7_tokens.jsonl"
-repetitions="1 2"
+new_dataset_name="pile8e9_20len"
+raw_dataset="${DATA_DIR}/pile8e9_orig.jsonl"
+repetitions="256"
 
 #This exits the script if any command fails
 set -e
@@ -17,7 +17,7 @@ set -e
 #Do not change below:
 
 #loop five times, each with different seed
-for i in {0..0}
+for i in {0..4}
 do
   for repetition in $repetitions
   do

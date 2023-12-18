@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --gres=gpu:a6000:1
+#SBATCH --gres=gpu:a6000:2
 #SBATCH --qos=general
 #SBATCH --exclude=glamor-ruby
 
