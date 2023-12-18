@@ -9,7 +9,7 @@ from src.data.from_raw import extract_k_tokens_and_store
 
 # raw_json = "./../45e8_tokens.jsonl"
 raw_json = "/home/johnny/data/00.jsonl"
-out_dataset = "./../pile8e9_orig"
+out_dataset = "./../pile8e9_orig.jsonl"
 
 def main():
     print("entered! ")

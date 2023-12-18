@@ -34,4 +34,6 @@ def extract_k_tokens_and_store(in_json_path, out_dataset_path, num_tokens):
     if (not is_terminated):
         print("WARNING: the dataset did not terminate! ")
     final_dataset = dataset.select(range(found_idx))
-    final_dataset.save_to_disk(out_dataset_path)
+    # final_dataset.save_to_disk(out_dataset_path)
+    #we save the final dataset in jsonl form
+    final_dataset.to_json(out_dataset_path, num_proc=100)
