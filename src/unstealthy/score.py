@@ -4,7 +4,7 @@ import csv
 import numpy as np
 import torch
 
-def get_null_random_sequences(null_n_seq, watermark_length, vocab_size, start_k = 0):
+def get_random_sequences(null_n_seq, watermark_length, vocab_size, start_k = 0):
     nullhyp_seqs = np.random.randint(start_k, start_k + vocab_size, size=(null_n_seq, watermark_length))
     return nullhyp_seqs
 
@@ -64,7 +64,7 @@ def calculate_scores_raretoken(**kwargs):
 
     watermark_length, vocab_size, start_k = df["seq_len"][0], df["vocab_size"][0], df["start_k"][0]
     vocab_size, watermark_length, start_k = int(vocab_size), int(watermark_length), int(start_k)
-    nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size, start_k)
+    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size, start_k)
 
     #we score the model based on how we perturbed the dataset - whether the watermark was stored is input_ids or string
     if kwargs["exp_type"] == "ids":
@@ -111,7 +111,7 @@ def calculate_scores_unstealthy(**kwargs):
 
     watermark_length, vocab_size = df["seq_len"][0], df["vocab_size"][0]
     vocab_size, watermark_length = int(vocab_size), int(watermark_length)
-    nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
+    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
 
     #we always want to convert our watermarks into strings and let the tokenizer encode them again (since we don't know how the tokenizer
     #encodes our watermark
@@ -164,7 +164,7 @@ def calculate_scores_unstealthy_repetition(**kwargs):
     #we just have to generate null_n_seq * model_unique_seq number of random watermarks. Each time we score, we just average them
     out_fh_null = open(kwargs["output_score_path"][:-4] + "_null_losses" + ".csv", 'wt')
     out_null = csv.writer(out_fh_null)
-    nullhyp_seqs = get_null_random_sequences(kwargs["null_n_seq"] * kwargs["model_unique_seq"], watermark_length, vocab_size)
+    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"] * kwargs["model_unique_seq"], watermark_length, vocab_size)
     random_perplexity = [get_mean(_calculate_loss_str(tokenizer.decode(i, return_tensors="pt"), \
                                                         model, tokenizer, device)).tolist() for i in nullhyp_seqs]
     out_null.writerows(random_perplexity)

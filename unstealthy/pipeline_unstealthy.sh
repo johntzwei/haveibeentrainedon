@@ -114,8 +114,6 @@ do
       echo "using data inside $dataset_dir"
       #the jsonl version of the current dataset
       json_dataset=("$dataset_dir"/*jsonl)
-      #the huggingface version of the current dataset
-      hf_dataset=("$dataset_dir"/*hf)
       #the propagation inputs of the current dataset
       propagation_inputs=("$dataset_dir"/*csv)
 
