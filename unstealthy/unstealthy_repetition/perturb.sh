@@ -15,7 +15,7 @@ out_dir=${DATA_DIR}/${exp_name}/${dataset_name}
 
 mkdir -p $out_dir
 
-python perturb_data.py\
+python perturb_dataset_repetion.py\
   --raw_dataset ${raw_dataset}\
   --watermark_length ${watermark_length}\
   --vocab_size $vocab_size\

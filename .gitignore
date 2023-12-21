@@ -1,6 +1,7 @@
 *.ipynp_checkpoints
 .idea/*
 gpt-neox
+gpt-neoxv2
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

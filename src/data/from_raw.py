@@ -14,19 +14,26 @@ def extract_k_tokens_and_store(in_json_path, out_dataset_path, num_tokens):
     def tokenize_function(examples):
         return {'len': len(tokenizer(examples["text"])['input_ids'])}
 
-    len_ds = dataset.map(tokenize_function, num_proc=100)
+    len_ds = dataset.map(tokenize_function, num_proc=100, keep_in_memory=True)
 
     #we now find the index that has the total sum > num_tokens
 
     length_arr = len_ds["len"]
     found_idx = len(length_arr)
+
+    is_terminated = False
+
     tot_sum = 0
     for idx in range(len(length_arr)):
         tot_sum += length_arr[idx]
         if (tot_sum > num_tokens):
             found_idx = idx
+            is_terminated = True
             break
 
-
+    if (not is_terminated):
+        print("WARNING: the dataset did not terminate! ")
     final_dataset = dataset.select(range(found_idx))
-    final_dataset.save_to_disk(out_dataset_path)
+    # final_dataset.save_to_disk(out_dataset_path)
+    #we save the final dataset in jsonl form
+    final_dataset.to_json(out_dataset_path, num_proc=100)
