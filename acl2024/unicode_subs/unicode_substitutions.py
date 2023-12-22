@@ -1,5 +1,6 @@
 import numpy as np
 from hashlib import sha256
+from functools import lru_cache
 
 # close homoglyphs in Ariel and monospace (default textbox and input fonts)
 # chosen using https://www.irongeek.com/homoglyph-attack-generator.php
@@ -36,6 +37,7 @@ def replace_all(x, seed):
         s = ''.join(s)
         return s
     
+@lru_cache(maxsize=2000000)
 def sample_substitution(x, seed):
     s = '%s %d' % (x, seed)
     hash = sha256(s.encode())
