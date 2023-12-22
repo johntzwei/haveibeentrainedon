@@ -1,6 +1,6 @@
-def generate_random_sequence_string(num_sequence, length, vocab_size):
+def generate_random_sequence_string(num_sequence, length, vocab_size, start_range):
     from src.unstealthy.score import get_random_sequences
-    random_sequence = get_random_sequences(num_sequence, length, vocab_size)
+    random_sequence = get_random_sequences(num_sequence, length, vocab_size, start_range)
     from transformers import GPT2Tokenizer
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     random_sequence = tokenizer.batch_decode(random_sequence)
@@ -19,7 +19,7 @@ def edit_json_unstealthy_scaling(orig_jsonl, new_jsonl, watermark, k, info):
 
     #generate a list of indices to perturb
     perturbed_instances = np.random.randint(0, tot_len, size=k)
-    print(perturbed_instances)
+    # print(perturbed_instances)
 
     data = []
 
@@ -55,10 +55,10 @@ def perturb_dataset(exp_name, **kwargs):
     #we first set the seed fixed
     np.random.seed(kwargs["seed"])
     #We just want to simply perturb the dataset randomly
-    if (exp_name == "unstealthy_scaling"):
+    if (exp_name == "unstealthy_scaling" or exp_name == "unstealthy_raretoken"):
         from src.utils import setup_dataset
         #We only have one sequence, so we just take the first random sequence
-        random_sequence = generate_random_sequence_string(1, kwargs["watermark_length"], kwargs["vocab_size"])
+        random_sequence = generate_random_sequence_string(1, kwargs["watermark_length"], kwargs["vocab_size"], kwargs["start_range"])
         random_sequence = random_sequence[0]
 
 

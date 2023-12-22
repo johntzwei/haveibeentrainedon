@@ -15,24 +15,24 @@ set -e
 #This script will output the model at: models/exp_name/dataset_name/model_size/models
 
 #looped five times, each with different seed
-for i in {1..4}
+for i in {0..4}
 do
   ##############Hyperparameters to change START ##################
-  exp_name="unstealthy_scaling"
+  exp_name="unstealthy_raretoken"
   #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
   #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-  group_folder="scaling_final"
+  group_folder="run"
   #NOTE: this is the subfolder
 
-  run_ID="70M final repetition experiment - pile8e9 training final 1500+ steps"
+  run_ID="70M final raretoken experiment - pile1e8 training final 1500+ steps scoring"
   #this will be stored in tps -aux | grep deepspeed.launcher.launchhe output model files to help debugging
 
   log_folder=${exp_name}/"sbatch_out"
   mkdir -p $log_folder
   #this is the folder that sbatch outputs will be stored in
 
-  dataset_name="pile8e9_20len_seed${i}"
+  dataset_name="pile1e8_20len_seed${i}"
   #the specific type of the dataset
 
   exp_dataset_dir=${DATA_DIR}/${exp_name}/${group_folder}/${dataset_name}
@@ -50,15 +50,13 @@ do
   model_out_dir=${MODEL_DIR}/${exp_name}/${group_folder}/${dataset_name}/${model_size}
 
   #training configs
-  #wikitext has 117919547 tokens
-  #pile data has 1B tokens
-  gpu_names="0,1"
-  num_gpus=2
-  train_batch_size=1024
+  gpu_names="0"
+  num_gpus=1
+  train_batch_size=128
   seq_length=512
   train_micro_batch_size_per_gpu=128
-  gradient_accumulation_steps=4
-  train_iters=15259 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  gradient_accumulation_steps=1
+  train_iters=1526 #MUST EDIT TO TRAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   #scoring configs
   #this is the number of random sequences that form the null
@@ -156,11 +154,11 @@ do
       echo $save
 
       #delete the directory if it existed before
-      if [ -e "$save" ]; then
-        echo "removing old directory"
-        rm -r $save
-      fi
-      mkdir -p $save
+#      if [ -e "$save" ]; then
+#        echo "removing old directory"
+#        rm -r $save
+#      fi
+#      mkdir -p $save
 
       #preparing for sbatch outputs and its execution
       sbatch_log=${log_folder}/${dataset_name}_${model_name}_${model_size}.txt

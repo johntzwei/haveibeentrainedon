@@ -60,6 +60,13 @@ def parse_args():
         type=int,
         help="number of repetitions of the watermark in each dataset"
     )
+
+    parser.add_argument(
+        '--start_range',
+        required=True,
+        type=int,
+        help="the starting range of the watermark characters amongst the tokenizer"
+    )
     return parser.parse_args()
 
 if __name__=="__main__":

@@ -9,14 +9,14 @@ from src.data.from_raw import extract_k_tokens_and_store
 
 # raw_json = "./../45e8_tokens.jsonl"
 raw_json = "/home/johnny/data/00.jsonl"
-out_dataset = "./../pile8e9_orig.jsonl"
+out_dataset = "./../pile1e8_orig.jsonl"
 
 def main():
     print("entered! ")
     print(sys.path)
     print(os.getcwd())
     from datasets import Features, Value
-    extract_k_tokens_and_store(raw_json, out_dataset, 8e9)
+    extract_k_tokens_and_store(raw_json, out_dataset, 1e8)
 
 
 if __name__=="__main__":
