@@ -153,20 +153,24 @@ def calculate_scores_unstealthy_repetition(**kwargs):
     out_fh_watermark = open(kwargs["output_score_path"][:-4] + "_watermark_losses" + ".csv", 'wt')
     out_watermark = csv.writer(out_fh_watermark)
     watermark_losses = []
+    tot_watermarks = [] #used to count the number of unique watermarks
     for index, row in df.iterrows():
         curr_watermark = row["watermark"]
-        loss = get_mean(_calculate_loss_str(curr_watermark, model, tokenizer, device)).tolist()
-        watermark_losses += [loss]
+        if (curr_watermark not in tot_watermarks):
+            tot_watermarks.append(curr_watermark)
+        loss = _calculate_loss_str(curr_watermark, model, tokenizer, device).tolist()[0]
+        watermark_losses.append(loss)
     out_watermark.writerows(watermark_losses)
     out_fh_watermark.close()
 
+    model_unique_seq = len(tot_watermarks)
     #we now prepare for the null distribution and store it -> null distribution should also be following k-repetition of watermark trend
     #we just have to generate null_n_seq * model_unique_seq number of random watermarks. Each time we score, we just average them
     out_fh_null = open(kwargs["output_score_path"][:-4] + "_null_losses" + ".csv", 'wt')
     out_null = csv.writer(out_fh_null)
-    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"] * kwargs["model_unique_seq"], watermark_length, vocab_size)
-    random_perplexity = [get_mean(_calculate_loss_str(tokenizer.decode(i, return_tensors="pt"), \
-                                                        model, tokenizer, device)).tolist() for i in nullhyp_seqs]
+    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"] * model_unique_seq, watermark_length, vocab_size)
+    random_perplexity = [_calculate_loss_str(tokenizer.decode(i, return_tensors="pt"), \
+                                                          model, tokenizer, device).tolist()[0] for i in nullhyp_seqs]
     out_null.writerows(random_perplexity)
     out_fh_null.close()
 

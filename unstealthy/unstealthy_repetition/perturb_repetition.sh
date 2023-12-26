@@ -1,18 +1,17 @@
-NEOX_DIR=./../gpt-neox
-DATA_DIR=./../data
-MODEL_DIR=./../models
+NEOX_DIR=./../../gpt-neox
+DATA_DIR=./../../data
+MODEL_DIR=./../../models
 
-watermark_length=80
+watermark_length=20
 vocab_size=100
 num_proc=100
-exp_name="unstealthy_scaling"
-group_folder="repetition_final"
-new_dataset_name="pile1e8_80len"
+exp_name="unstealthy_repetition"
+group_folder="run"
+new_dataset_name="pile1e8_20len"
 raw_dataset="${DATA_DIR}/pile1e8_orig.jsonl"
-repetitions="1 2 4 8 16 32 64 128 256 512 1024"
+repetitions="1 2 4 8 16 32 64 128 256"
 #the start of the vocabulary to which we are extracting random sequences
 start_range="0"
-num_watermarks=1
 
 #This exits the script if any command fails
 set -e
@@ -24,6 +23,7 @@ for i in {0..4}
 do
   for repetition in $repetitions
   do
+
     temp_new_dataset_name="${new_dataset_name}_seed${i}/${repetition}_dataset"
     out_dir="${DATA_DIR}/${exp_name}/${group_folder}/${temp_new_dataset_name}"
 
@@ -34,7 +34,9 @@ do
 
     echo "beginning for ${temp_new_dataset_name}}"
 
-    python perturb_data.py\
+    num_watermarks=$((256/repetition))
+
+    python ./../perturb_data.py\
       --exp_name ${exp_name}\
       --raw_dataset ${raw_dataset}\
       --watermark_length ${watermark_length}\
