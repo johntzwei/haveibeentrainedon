@@ -57,7 +57,7 @@ def perturb_dataset(exp_name, **kwargs):
     #we first set the seed fixed
     np.random.seed(kwargs["seed"])
     #We just want to simply perturb the dataset randomly
-    if (exp_name == "unstealthy_scaling" or exp_name == "unstealthy_raretoken" or exp_name == "unstealthy_repetition"):
+    if (exp_name == "unstealthy_scaling" or exp_name == "unstealthy_raretoken" or exp_name == "unstealthy_tradeoff"):
         from src.utils import setup_dataset
         #We only have one sequence, so we just take the first random sequence
         random_sequences = generate_random_sequence_string(kwargs["num_watermarks"], kwargs["watermark_length"], kwargs["vocab_size"], kwargs["start_range"])
