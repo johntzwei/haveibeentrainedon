@@ -60,6 +60,12 @@ def parse_args():
         type=int,
         help="number of repetitions of the watermark in each dataset"
     )
+    parser.add_argument(
+        '--num_watermarks',
+        required=True,
+        type=int,
+        help="number of watermarks to include in the dataset, each with 'repetition' number of repetitions. Total number of watermarks = num_watermarks * repetition"
+    )
 
     parser.add_argument(
         '--start_range',

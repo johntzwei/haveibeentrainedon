@@ -11,7 +11,12 @@ def main(args):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-
+    parser.add_argument(
+        '--score_type',
+        choices=["loss_per_token", "loss_avg"],
+        required=True,
+        help="the type of scoring method to do"
+    )
 
     parser.add_argument(
         '--path_to_model',
@@ -38,12 +43,6 @@ def parse_args():
     parser.add_argument(
         '--output_score_path',
         help="the path to propagation_inputs file to score"
-    )
-
-    parser.add_argument(
-        '--model_unique_seq',
-        type=int,
-        help="the value of k of the given model"
     )
 
     return parser.parse_args()
