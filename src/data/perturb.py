@@ -18,7 +18,7 @@ def edit_json_unstealthy_scaling(orig_jsonl, new_jsonl, watermarks, k, info):
         tot_len = sum(1 for _ in orig_file)
 
     #generate a list of indices to perturb
-    perturbed_instances = np.random.randint(0, tot_len, size=len(watermarks) * k)
+    perturbed_instances = np.random.choice(tot_len, size=len(watermarks) * k, replace=False)
     #assumes that there are no repeats in the perturbed instances
 
     data = []
@@ -46,6 +46,7 @@ def edit_json_unstealthy_scaling(orig_jsonl, new_jsonl, watermarks, k, info):
                 new_file.write(line)
 
     prop_inputs = pd.DataFrame(data)
+    print(f"prop_inputs has {len(prop_inputs)} number of perturbed examples! ")
     prop_inputs.columns = ['example_index', 'text', 'sub_index', 'seq_len', 'vocab_size', 'watermark']
     return prop_inputs
 
