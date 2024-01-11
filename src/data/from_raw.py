@@ -34,6 +34,7 @@ def extract_k_tokens_and_store(in_json_path, out_dataset_path, num_tokens):
 
     if (not is_terminated):
         print("WARNING: the dataset did not terminate! ")
+        print(f"total length is {tot_sum} while num_tokens is {num_tokens}")
         return
     print(f"found index {found_idx} among {tot_sum}")
 
