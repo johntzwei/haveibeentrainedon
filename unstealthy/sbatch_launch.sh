@@ -1,12 +1,13 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --exclude=glamor-ruby
 #SBATCH --qos=general
 #SBATCH --requeue
+#SBATCH --exclude=glamor-ruby
 #This exits the script if any command fails
 
 set -e
+
 
 
 

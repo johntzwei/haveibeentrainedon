@@ -16,15 +16,24 @@ exp_name="unstealthy_scaling"
 group_folder="scaling_final"
 #NOTE: this is the subfolder
 
-run_ID="70M final scaling experiment - pile1e9 training final 1500+ steps 1024 repetitions to test for tapering off"
+run_ID="160M final scaling experiment - training final 1500+ steps"
 #this will be stored in the output model files to help debugging
 
-model_size="70M"
+model_size="160M"
 #the size of the model - should be same as config folder of the model
 
-dataset_list=("pile1e9_20len" "pile2e9_20len" "pile4e9_20len" "pile8e9_20len")
-num_gpus_list=(2 2 4 4)
-train_iters_list=(1907 3814 7629 15258)
+#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
+#num_gpus_list=(2 2 4 4)
+#train_iters_list=(1907 3814 7629 15258)
+
+dataset_list=("pile4e9_80len")
+num_gpus_list=(4)
+train_iters_list=(7629)
+
+#dataset_list=("pile2e9_80len")
+#num_gpus_list=(2)
+#train_iters_list=(3814)
+
 #NOTE: the number of gpus should be the same as the number of datasets
 
 train_batch_size=1024
@@ -39,7 +48,7 @@ for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
   for i in {2..2}
   do
-    ##############Hyperparameters to change END ##################
+    ##############Hyperparalsmeters to change END ##################
 
     log_folder=${exp_name}/"sbatch_out"
     mkdir -p $log_folder
@@ -89,10 +98,10 @@ for dataset_ind in "${!dataset_list[@]}"; do
     if [ -d "$exp_dataset_dir" ]; then
 
       #each dataset should have a dataset postfix in its folder name
-      all_datasets="$exp_dataset_dir"/*dataset
+#      all_datasets="$exp_dataset_dir"/*dataset
 
       #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-  #    all_datasets="${exp_dataset_dir}/20000_dataset"
+      all_datasets="${exp_dataset_dir}/256_dataset"
 
       #the list of datasets to skip in the $exp_dataset_dir folder
       exclude_datasets=""
