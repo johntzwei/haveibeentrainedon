@@ -5,6 +5,7 @@
 # has been reached and save this dataset
 def extract_k_tokens_and_store(in_json_path, out_dataset_path, num_tokens):
     from src.utils import setup_tokenizer, setup_dataset
+    import subprocess
     tokenizer = setup_tokenizer("gpt2")
     print("setting up dataset! ")
     dataset = setup_dataset(in_json_path)["train"]
@@ -33,7 +34,15 @@ def extract_k_tokens_and_store(in_json_path, out_dataset_path, num_tokens):
 
     if (not is_terminated):
         print("WARNING: the dataset did not terminate! ")
-    final_dataset = dataset.select(range(found_idx))
-    # final_dataset.save_to_disk(out_dataset_path)
-    #we save the final dataset in jsonl form
-    final_dataset.to_json(out_dataset_path, num_proc=100)
+        print(f"total length is {tot_sum} while num_tokens is {num_tokens}")
+        return
+    print(f"found index {found_idx} among {tot_sum}")
+
+    command = f"head -n {found_idx} {in_json_path} > {out_dataset_path}"
+
+    subprocess.run(command, shell=True, check=True)
+
+    # final_dataset = dataset.select(range(found_idx))
+    # # final_dataset.save_to_disk(out_dataset_path)
+    # #we save the final dataset in jsonl form
+    # final_dataset.to_json(out_dataset_path, num_proc=100)
