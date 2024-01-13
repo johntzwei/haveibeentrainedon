@@ -16,19 +16,19 @@ exp_name="unstealthy_scaling"
 group_folder="scaling_final"
 #NOTE: this is the subfolder
 
-run_ID="160M final scaling experiment - training final 1500+ steps"
+run_ID="410M final scaling experiment - training final 1500+ steps"
 #this will be stored in the output model files to help debugging
 
-model_size="160M"
+model_size="410M"
 #the size of the model - should be same as config folder of the model
 
 #dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
 
-dataset_list=("pile4e9_80len")
+dataset_list=("pile8e9_80len")
 num_gpus_list=(4)
-train_iters_list=(7629)
+train_iters_list=(15258)
 
 #dataset_list=("pile2e9_80len")
 #num_gpus_list=(2)
@@ -46,7 +46,7 @@ null_n_seq=1000
 #looped for each dataset
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
-  for i in {2..2}
+  for i in {0..2}
   do
     ##############Hyperparalsmeters to change END ##################
 
