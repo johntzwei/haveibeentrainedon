@@ -35,7 +35,7 @@ def main(args):
     # wandb_project = args.save.split("/")[-2] + "_" + args.save.split("/")[-3] + "_" + args.save.split("/")[-4] #-2 is model size, -3 is data_type, -4 is experiment name
     # wandb_group = args.save.split("/")[-1]
     # update_configs_setup["wandb_project"] = wandb_project
-    wandb_group = "_".join(args.save.split("/")[-4:])# -1 is repetition number, -2 is model size, -3 is data_type, -4 is experiment name
+    wandb_group = "_".join(args.save.split("/")[-5:])# -1 is repetition number, -2 is model size, -3 is data_type, -4 is group name, -5 is experiment name
     update_configs_setup["wandb_group"] = wandb_group
     update_configs_setup["include"] = args.include
     from random import randint
