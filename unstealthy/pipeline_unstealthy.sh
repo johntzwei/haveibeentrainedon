@@ -9,26 +9,26 @@ set -e
 
 ##############Hyperparameters to change START ##################
 
-exp_name="unstealthy_scaling"
+exp_name="unicode_scaling"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-group_folder="scaling_final"
+group_folder="run"
 #NOTE: this is the subfolder
 
-run_ID="160M final scaling experiment - training final 1500+ steps"
+run_ID="Johnny's data scaling experiments"
 #this will be stored in the output model files to help debugging
 
-model_size="160M"
+model_size="70M"
 #the size of the model - should be same as config folder of the model
 
-#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
+#dataset_list=("1B_perturbed" "2B_perturbed" "4B_perturbed" "8B_perturbed")
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
 
-dataset_list=("pile4e9_80len")
-num_gpus_list=(4)
-train_iters_list=(7629)
+dataset_list=("4B_perturbed" "8B_perturbed")
+num_gpus_list=(1 1)
+train_iters_list=(7629 15258)
 
 #dataset_list=("pile2e9_80len")
 #num_gpus_list=(2)
@@ -46,7 +46,7 @@ null_n_seq=1000
 #looped for each dataset
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
-  for i in {2..2}
+  for i in {1..3}
   do
     ##############Hyperparalsmeters to change END ##################
 
@@ -101,7 +101,7 @@ for dataset_ind in "${!dataset_list[@]}"; do
 #      all_datasets="$exp_dataset_dir"/*dataset
 
       #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-      all_datasets="${exp_dataset_dir}/256_dataset"
+      all_datasets="${exp_dataset_dir}/0_dataset"
 
       #the list of datasets to skip in the $exp_dataset_dir folder
       exclude_datasets=""
@@ -167,12 +167,12 @@ for dataset_ind in "${!dataset_list[@]}"; do
         save=${model_out_dir}/${model_name}
         echo $save
 
-        #delete the directory if it existed before
-        if [ -e "$save" ]; then
-          echo "removing old directory"
-          rm -r $save
-        fi
-        mkdir -p $save
+#        #delete the directory if it existed before
+#        if [ -e "$save" ]; then
+#          echo "removing old directory"
+#          rm -r $save
+#        fi
+#        mkdir -p $save
 
         #preparing for sbatch outputs and its execution
         sbatch_log=${log_folder}/${dataset_name}_${model_name}_${model_size}.txt
@@ -188,11 +188,11 @@ for dataset_ind in "${!dataset_list[@]}"; do
   #      echo "begin bash launch!"
 
         #this is in case slurm is not working - directly ssh into a node to run
-  #      bash sbatch_launch.sh \
-  #                $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
-  #                $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
-  #                $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-  #                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type "${seq_length}" "$run_ID" > ${sbatch_log} 2>&1&
+#        bash sbatch_launch.sh \
+#                  $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
+#                  $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
+#                  $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
+#                  $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type "${seq_length}" "$exp_name" "$run_ID" > ${sbatch_log} 2>&1&
 
         echo "------------Status: submitted batch job for model $model_name"
         ### --- in this code block we perform an entire pipeline

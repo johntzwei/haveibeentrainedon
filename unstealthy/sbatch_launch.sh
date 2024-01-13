@@ -1,13 +1,12 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --qos=general
-#SBATCH --requeue
 #SBATCH --exclude=glamor-ruby
+#SBATCH --requeue
+#SBATCH --qos=general
 #This exits the script if any command fails
 
 set -e
-
 
 
 
@@ -53,53 +52,53 @@ echo "$debug_info" > "${save}/run_id.txt"
 
 echo "------------Status: Beginning sbatch"
 
-#This is used to store config folders temporarily
-temp_folder="${exp_name}/temp"
-mkdir -p $temp_folder
-temp_config="${temp_folder}/${model_name}_${dataset_name}_${model_size}_config.yml"
-temp_setup="${temp_folder}/${model_name}_${dataset_name}_${model_size}_setup.yml"
-
-#remove the old configs if they exist
-if [ -e $temp_config ]; then
-  rm $temp_config
-fi
-if [ -e $temp_setup ]; then
-  rm $temp_setup
-fi
-
-cp $model_config_file $temp_config
-cp $model_local_setup $temp_setup
-
-#updates the yaml file - to change to account for sbatch
-python update_configs.py\
-        --path_to_model_yaml $temp_config\
-        --path_to_setup_yaml $temp_setup\
-        --global_num_gpus $num_gpus\
-        --train_batch_size $train_batch_size\
-        --train_micro_batch_size_per_gpu $train_micro_batch_size_per_gpu\
-        --gradient_accumulation_steps=$gradient_accumulation_steps\
-        --train_iters $train_iters\
-        --seq_length $seq_length\
-        --data_path "$tokenized_dir"/tokenized_text_document\
-        --save $save\
-        --include "localhost:$gpu_names"\
-        --master_port $model_unique_seq
-
-echo "------------Status: finished updating configs  at $tokenized_dir"
-
-
-python $NEOX_DIR/deepy.py $NEOX_DIR/train.py \
-        -d . $temp_config $temp_setup
-
-echo "------------Status: finished training and model saved to $save"
-
-#    convert the model
-python $NEOX_DIR/tools/convert_module_to_hf.py \
-        --input_dir "${save}/global_step${train_iters}/" \
-        --config_file $temp_config \
-        --output_dir ${save}/hf_model
-
-echo "------------Status: finished converting model saved to $save"
+##This is used to store config folders temporarily
+#temp_folder="${exp_name}/temp"
+#mkdir -p $temp_folder
+#temp_config="${temp_folder}/${model_name}_${dataset_name}_${model_size}_config.yml"
+#temp_setup="${temp_folder}/${model_name}_${dataset_name}_${model_size}_setup.yml"
+#
+##remove the old configs if they exist
+#if [ -e $temp_config ]; then
+#  rm $temp_config
+#fi
+#if [ -e $temp_setup ]; then
+#  rm $temp_setup
+#fi
+#
+#cp $model_config_file $temp_config
+#cp $model_local_setup $temp_setup
+#
+##updates the yaml file - to change to account for sbatch
+#python update_configs.py\
+#        --path_to_model_yaml $temp_config\
+#        --path_to_setup_yaml $temp_setup\
+#        --global_num_gpus $num_gpus\
+#        --train_batch_size $train_batch_size\
+#        --train_micro_batch_size_per_gpu $train_micro_batch_size_per_gpu\
+#        --gradient_accumulation_steps=$gradient_accumulation_steps\
+#        --train_iters $train_iters\
+#        --seq_length $seq_length\
+#        --data_path "$tokenized_dir"/tokenized_text_document\
+#        --save $save\
+#        --include "localhost:$gpu_names"\
+#        --master_port $model_unique_seq
+#
+#echo "------------Status: finished updating configs  at $tokenized_dir"
+#
+#
+#python $NEOX_DIR/deepy.py $NEOX_DIR/train.py \
+#        -d . $temp_config $temp_setup
+#
+#echo "------------Status: finished training and model saved to $save"
+#
+##    convert the model
+#python $NEOX_DIR/tools/convert_module_to_hf.py \
+#        --input_dir "${save}/global_step${train_iters}/" \
+#        --config_file $temp_config \
+#        --output_dir ${save}/hf_model
+#
+#echo "------------Status: finished converting model saved to $save"
 
 CUDA_VISIBLE_DEVICES=$gpu_names python ${exp_name}/score_model.py\
         --score_type=${score_type}\
@@ -112,8 +111,8 @@ CUDA_VISIBLE_DEVICES=$gpu_names python ${exp_name}/score_model.py\
 echo "------------Status: finished scoring model saved to ${save}/scored.csv"
 
 #remove the model as well as other generated things to save space
-rm -r "${save}/global_step${train_iters}"
-rm -r "${save}/hf_model"
-rm -r "${save}/zero_to_fp32.py"
+#rm -r "${save}/global_step${train_iters}"
+#rm -r "${save}/hf_model"
+#rm -r "${save}/zero_to_fp32.py"
 
 

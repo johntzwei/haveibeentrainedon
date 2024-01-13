@@ -117,9 +117,6 @@ def calculate_scores_unicode(**kwargs):
     out_fh = open(kwargs["output_score_path"], 'wt')
     out = csv.writer(out_fh)
 
-    import pdb
-    pdb.set_trace()
-
     if kwargs["score_type"] == "loss_per_token":
         # if we want to return loss across tokens
         # output format is: used?, loss for each token
