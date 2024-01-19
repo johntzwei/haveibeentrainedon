@@ -26,9 +26,13 @@ model_size="410M"
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
 
-dataset_list=("pile8e9_80len")
+#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len")
+#num_gpus_list=(2 2 4)
+#train_iters_list=(1907 3814 7629)
+
+dataset_list=("pile12e9_80len")
 num_gpus_list=(4)
-train_iters_list=(15258)
+train_iters_list=(22888)
 
 #dataset_list=("pile2e9_80len")
 #num_gpus_list=(2)
