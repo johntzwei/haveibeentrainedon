@@ -2,3 +2,6 @@ a55353d837cbf7bc006cf49eeff05ae5044e757498e30643a9199b9a25bc9a34
 
 # bitcoin genesis block, should work but is not random
 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+
+# sha256 hash of empty string ""
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
