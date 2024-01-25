@@ -224,7 +224,7 @@ def calculate_scores_bigboys(**kwargs):
     null_distribution = [statistics.mean(i) for i in random_perplexity]
 
     z_scores = np.array(get_z_scores(statistic, null_distribution))
-    z_scores.unsqueeze(0)
+    z_scores = z_scores[..., np.newaxis] #for writerows to work
     out.writerows(z_scores)
     out_fh.close()
 
