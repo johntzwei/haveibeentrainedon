@@ -1,12 +1,15 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --exclude=allegro-adams,glamor-ruby
-#This exits the script if any command fails
-
-set -e
+#SBATCH --exclude=glamor-ruby
 #SBATCH --qos=general
 #SBATCH --requeue
+#This exits the script if any command fails
+
+
+set -e
+
+
 
 
 echo $CONDA_DEFAULT_ENV

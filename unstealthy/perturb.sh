@@ -7,7 +7,7 @@ vocab_size=100
 num_proc=100
 #must make sure there is a "{datasets[i]}_orig.jsonl" file
 #datasets=("pile1e9" "pile2e9" "pile4e9" "pile8e9")
-datasets=("pile12e9")
+datasets=("pile6e9")
 
 exp_name="unstealthy_scaling"
 group_folder="scaling_final"
