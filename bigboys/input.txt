@@ -33,5 +33,5 @@ bdccb6c72ddeadb500ae768386cb38cc41c63dbb0878ddb9c7a38a431b78378d
 # sha-256("hello")
 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
 
-# sha-256(sha-256("hello"))
+# sha-256(sha-256("hello")) (7 matches in data portraits)
 9595c9df90075148eb06860365df33584b75bff782a510c6cd4883a419833d50
