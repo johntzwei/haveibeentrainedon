@@ -6,7 +6,9 @@
 #SBATCH --requeue
 #This exits the script if any command fails
 
+
 set -e
+
 
 
 

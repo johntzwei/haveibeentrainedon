@@ -16,15 +16,29 @@ exp_name="unstealthy_scaling"
 group_folder="scaling_final"
 #NOTE: this is the subfolder
 
-run_ID="70M final scaling experiment - pile1e9 training final 1500+ steps 1024 repetitions to test for tapering off"
+run_ID="70M final scaling experiment - training final 1500+ steps"
 #this will be stored in the output model files to help debugging
 
 model_size="70M"
 #the size of the model - should be same as config folder of the model
 
-dataset_list=("pile1e9_20len" "pile2e9_20len" "pile4e9_20len" "pile8e9_20len")
-num_gpus_list=(2 2 4 4)
-train_iters_list=(1907 3814 7629 15258)
+#for seq_length of 512
+#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
+#num_gpus_list=(2 2 4 4)
+#train_iters_list=(1907 3814 7629 15258)
+
+dataset_list=("pile6e9_80len")
+num_gpus_list=(4)
+train_iters_list=(11444)
+
+#for seq_length of 2048 (pythia configs)
+#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
+#num_gpus_list=(2 2 4 4)
+#train_iters_list=(476 953 1907 3814)
+
+
+
+
 #NOTE: the number of gpus should be the same as the number of datasets
 
 train_batch_size=1024
@@ -37,9 +51,9 @@ null_n_seq=1000
 #looped for each dataset
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
-  for i in {2..2}
+  for i in {0..2}
   do
-    ##############Hyperparameters to change END ##################
+    ##############Hyperparalsmeters to change END ##################
 
     log_folder=${exp_name}/"sbatch_out"
     mkdir -p $log_folder
@@ -89,10 +103,10 @@ for dataset_ind in "${!dataset_list[@]}"; do
     if [ -d "$exp_dataset_dir" ]; then
 
       #each dataset should have a dataset postfix in its folder name
-      all_datasets="$exp_dataset_dir"/*dataset
+#      all_datasets="$exp_dataset_dir"/*dataset
 
       #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-  #    all_datasets="${exp_dataset_dir}/20000_dataset"
+      all_datasets="${exp_dataset_dir}/256_dataset"
 
       #the list of datasets to skip in the $exp_dataset_dir folder
       exclude_datasets=""
@@ -179,11 +193,11 @@ for dataset_ind in "${!dataset_list[@]}"; do
   #      echo "begin bash launch!"
 
         #this is in case slurm is not working - directly ssh into a node to run
-  #      bash sbatch_launch.sh \
-  #                $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
-  #                $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
-  #                $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-  #                $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type "${seq_length}" "$run_ID" > ${sbatch_log} 2>&1&
+#        bash sbatch_launch.sh \
+#                  $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
+#                  $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
+#                  $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
+#                  $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type $seq_length $exp_name "$run_ID" > "${sbatch_log}" 2>&1
 
         echo "------------Status: submitted batch job for model $model_name"
         ### --- in this code block we perform an entire pipeline
