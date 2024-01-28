@@ -190,13 +190,15 @@ def calculate_scores_bigboys(**kwargs):
     import statistics
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model(path_to_model=kwargs["path_to_model"]).to(device)
+    model = setup_model(path_to_model=kwargs["path_to_model"])
     tokenizer = setup_tokenizer(kwargs["path_to_tokenizer"])
+
 
     # these are the sequences that we will test
     in_fh = open(kwargs["input_file"], 'rt')
 
-    target_sequences = [i.strip() for i in in_fh.readlines()]
+
+    target_sequences = [i.strip() for i in in_fh.readlines() if i != "\n" and i[0] != "#"]
 
     # prepare write out
     out_fh = open(kwargs["output_score_path"], 'wt')
