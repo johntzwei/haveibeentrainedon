@@ -16,23 +16,33 @@ exp_name="unicode_scaling"
 group_folder="run"
 #NOTE: this is the subfolder
 
-run_ID="Johnny's data scaling experiments"
+run_ID="410M final scaling experiment - training final 1500+ steps for scoring"
 #this will be stored in the output model files to help debugging
 
-model_size="70M"
+model_size="410M"
 #the size of the model - should be same as config folder of the model
 
+#for seq_length of 512, unstealthy
+#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
+#num_gpus_list=(2 2 4 4)
+#train_iters_list=(1907 3814 7629 15258)
+
+#for seq_length of 512, unicode
 #dataset_list=("1B_perturbed" "2B_perturbed" "4B_perturbed" "8B_perturbed")
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
 
-dataset_list=("4B_perturbed" "8B_perturbed")
-num_gpus_list=(1 1)
-train_iters_list=(7629 15258)
 
-#dataset_list=("pile2e9_80len")
-#num_gpus_list=(2)
-#train_iters_list=(3814)
+#for seq_length of 512, unicode
+dataset_list=("4B_perturbed")
+num_gpus_list=(4)
+train_iters_list=(7629)
+
+
+#dataset_list=("pile6e9_80len")
+#num_gpus_list=(4)
+#train_iters_list=(11444)
+
 
 #NOTE: the number of gpus should be the same as the number of datasets
 
@@ -46,7 +56,7 @@ null_n_seq=1000
 #looped for each dataset
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
-  for i in {1..3}
+  for i in {3..3}
   do
     ##############Hyperparalsmeters to change END ##################
 
@@ -167,12 +177,12 @@ for dataset_ind in "${!dataset_list[@]}"; do
         save=${model_out_dir}/${model_name}
         echo $save
 
-#        #delete the directory if it existed before
-#        if [ -e "$save" ]; then
-#          echo "removing old directory"
-#          rm -r $save
-#        fi
-#        mkdir -p $save
+        #delete the directory if it existed before
+        if [ -e "$save" ]; then
+          echo "removing old directory"
+          rm -r $save
+        fi
+        mkdir -p $save
 
         #preparing for sbatch outputs and its execution
         sbatch_log=${log_folder}/${dataset_name}_${model_name}_${model_size}.txt
