@@ -39,6 +39,7 @@ def main(args):
     update_configs_setup["wandb_group"] = wandb_group
     update_configs_setup["include"] = args.include
     from random import randint
+
     update_configs_setup["master_port"] = args.master_port + 29500 + randint(1, 10000)
 
     edit_yaml(args.path_to_setup_yaml, **update_configs_setup)

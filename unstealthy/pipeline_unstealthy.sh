@@ -23,9 +23,11 @@ model_size="410M"
 #the size of the model - should be same as config folder of the model
 
 #for seq_length of 512, unstealthy
+
 #dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
+
 
 #for seq_length of 512, unicode
 #dataset_list=("1B_perturbed" "2B_perturbed" "4B_perturbed" "8B_perturbed")
@@ -35,13 +37,15 @@ model_size="410M"
 
 #for seq_length of 512, unicode
 dataset_list=("4B_perturbed")
+
 num_gpus_list=(4)
-train_iters_list=(7629)
+train_iters_list=(11444)
 
+#for seq_length of 2048 (pythia configs)
+#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
+#num_gpus_list=(2 2 4 4)
+#train_iters_list=(476 953 1907 3814)
 
-#dataset_list=("pile6e9_80len")
-#num_gpus_list=(4)
-#train_iters_list=(11444)
 
 
 #NOTE: the number of gpus should be the same as the number of datasets
@@ -57,6 +61,7 @@ null_n_seq=1000
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
   for i in {3..3}
+
   do
     ##############Hyperparalsmeters to change END ##################
 
@@ -202,7 +207,8 @@ for dataset_ind in "${!dataset_list[@]}"; do
 #                  $cwd $model_config_file $model_local_setup $num_gpus $train_batch_size\
 #                  $train_micro_batch_size_per_gpu $gradient_accumulation_steps $train_iters\
 #                  $tokenized_dir $save $gpu_names $NEOX_DIR $propagation_inputs $null_seed\
-#                  $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type "${seq_length}" "$exp_name" "$run_ID" > ${sbatch_log} 2>&1&
+#                  $null_n_seq $model_name $model_unique_seq $dataset_name $model_size $score_type $seq_length $exp_name "$run_ID" > "${sbatch_log}" 2>&1
+
 
         echo "------------Status: submitted batch job for model $model_name"
         ### --- in this code block we perform an entire pipeline

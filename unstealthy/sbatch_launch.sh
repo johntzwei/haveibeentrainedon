@@ -2,7 +2,9 @@
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
 #SBATCH --exclude=glamor-ruby,ink-noah
+
 #This exits the script if any command fails
+
 
 set -e
 #SBATCH --requeue

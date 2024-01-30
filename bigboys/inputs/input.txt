@@ -1,0 +1,37 @@
+a55353d837cbf7bc006cf49eeff05ae5044e757498e30643a9199b9a25bc9a34
+
+# bitcoin genesis block, should work but is not random
+000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+
+# sha256 hash of empty string ""
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+# https://github.com/Caligatio/jsSHA/blob/609796db96b0c77e1415031c3da64b3b9fa80f81/test/hash_data.js#L179 (some test cases, 4 year old code)
+
+# "abc"
+ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+
+# "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"
+248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1
+
+# 9 matches in data portraits
+# millionaAscii
+cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0
+
+# 2 matches in data portraits
+# "Sample message for keylen<blocklen"
+a28cf43130ee696a98f14a37678b56bcfcbdd9e5cf69717fecf5480f0ebdf790
+
+# 1 match
+8bb9a1db9806f20df7f77b82138c7914d174d59e13dc4d0169c9057b133e1d62
+
+# NOT IN data portraits
+184f6d6e82554c051b33f15e7ffffecb0cc0f461a29096c41c214e168e34c21d
+10e286f907c0fe9f02cea3864cbaec04ae47e2c0a13b60473bc9968a4851b219
+bdccb6c72ddeadb500ae768386cb38cc41c63dbb0878ddb9c7a38a431b78378d
+
+# sha-256("hello")
+2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+
+# sha-256(sha-256("hello")) (7 matches in data portraits)
+9595c9df90075148eb06860365df33584b75bff782a510c6cd4883a419833d50

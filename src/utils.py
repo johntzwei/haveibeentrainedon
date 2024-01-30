@@ -24,9 +24,9 @@ def setup_model(path_to_model, float_16=False):
     import torch
     if float_16:
         model = AutoModelForCausalLM.from_pretrained(path_to_model, revision="float16", torch_dtype=torch.float16,
-                                                     return_dict=True)
+                                                     return_dict=True, device_map="auto")
     else:
-        model = AutoModelForCausalLM.from_pretrained(path_to_model, return_dict=True)
+        model = AutoModelForCausalLM.from_pretrained(path_to_model, return_dict=True, torch_dtype=torch.float16, device_map="auto")
     print(f"imported model from {path_to_model}")
     return model
 
