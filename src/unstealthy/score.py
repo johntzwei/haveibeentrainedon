@@ -21,8 +21,11 @@ def calculate_loss_across_tokens(logits, labels, shift = False):
     return cross
 
 #gets the token loss given a string sequence
-def _calculate_loss_str(string_sentence, model, tokenizer, device):
+def _calculate_loss_str(string_sentence, model, tokenizer, device, unicode_max_length=-1):
     tokenized_sequence = tokenizer.encode(string_sentence, return_tensors='pt')
+    #in unicode experiments, we score with a max tokens length
+    if (unicode_max_length != -1):
+        tokenized_sequence = tokenized_sequence[:, -unicode_max_length:]
     return _calculate_loss_ids(tokenized_sequence, model, device)
 
 #gets the token loss given input_ids
@@ -96,6 +99,48 @@ def calculate_scores_raretoken(**kwargs):
 
     out.writerow(watermark_perplexity)
     out.writerows(random_perplexity)
+
+    out_fh.close()
+
+def calculate_scores_unicode(**kwargs):
+    """Calculates the scores for unicode experiment.
+
+    Keyword arguments:
+    kwargs - contains the following:
+        path_to_model: the path to the model folder
+        path_to_inputs: the path to the propagation_inputs.csv file
+        null_seed: the seed to generate the null distribution with
+        null_n_seq: number of sequences to form the null distribution
+        output_score_path: the path to the output csv file
+        score_type: the type of scoring method to do"""
+
+    # The following prepares the model and the tokenizers
+    device = get_device()
+    model = setup_model(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
+    tokenizer = setup_tokenizer("gpt2")
+
+    # reads in
+    df = pd.read_csv(kwargs["path_to_inputs"])
+    #    'group', 'watermark' 'used?' 'bits'
+    used_col = df["used?"]
+    watermark_col = df["watermark"]
+
+    # prepare write out
+    out_fh = open(kwargs["output_score_path"], 'wt')
+    out = csv.writer(out_fh)
+
+    if kwargs["score_type"] == "loss_per_token":
+        # if we want to return loss across tokens
+        # output format is: used?, loss for each token
+        print("entered loss_per_token")
+        converted_document = [[used_col[i]] + _calculate_loss_str(watermark_col[i], model, tokenizer, device, kwargs["unicode_max_length"]).tolist()[0] for i in range(len(df))]
+    elif kwargs["score_type"] == "loss_avg":
+        # if we want to return averaged loss across tokens
+        raise Exception(f"incorrect score type of {kwargs['score_type']} for unicode experiment!")
+    else:
+        raise Exception("incorrect score type! ")
+
+    out.writerows(converted_document)
 
     out_fh.close()
 
