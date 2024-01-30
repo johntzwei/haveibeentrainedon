@@ -1,4 +1,4 @@
-from src.utils import get_device, setup_model, setup_tokenizer
+from src.utils import get_device, setup_model, setup_tokenizer, setup_model_distributed
 import pandas as pd
 import csv
 import numpy as np
@@ -149,7 +149,7 @@ def calculate_scores_unstealthy(**kwargs):
 
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
+    model = setup_model_distributed(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
     tokenizer = setup_tokenizer("gpt2")
 
     #reads in
@@ -235,7 +235,7 @@ def calculate_scores_bigboys(**kwargs):
     import statistics
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model(path_to_model=kwargs["path_to_model"])
+    model = setup_model_distributed(path_to_model=kwargs["path_to_model"])
     tokenizer = setup_tokenizer(kwargs["path_to_tokenizer"])
 
 

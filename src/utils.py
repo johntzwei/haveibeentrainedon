@@ -24,9 +24,18 @@ def setup_model(path_to_model, float_16=False):
     import torch
     if float_16:
         model = AutoModelForCausalLM.from_pretrained(path_to_model, revision="float16", torch_dtype=torch.float16,
-                                                     return_dict=True, device_map="auto")
+                                                     return_dict=True)
     else:
-        model = AutoModelForCausalLM.from_pretrained(path_to_model, return_dict=True, torch_dtype=torch.float16, device_map="auto")
+        model = AutoModelForCausalLM.from_pretrained(path_to_model, return_dict=True)
+    print(f"imported model from {path_to_model}")
+    return model
+
+def setup_model_distributed(path_to_model):
+    from transformers import AutoModelForCausalLM
+    import torch
+
+    model = AutoModelForCausalLM.from_pretrained(path_to_model, return_dict=True, torch_dtype=torch.float16,
+                                                     device_map="auto")
     print(f"imported model from {path_to_model}")
     return model
 
