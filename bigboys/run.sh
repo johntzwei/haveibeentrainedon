@@ -12,16 +12,18 @@ output_dir="outputs"
 
 ##############Hyperparameters to change START ##################
 
-#models=("meta-llama/Llama-2-7b-hf" "meta-llama/Llama-2-13b-hf" "meta-llama/Llama-2-70b-hf" "EleutherAI/gpt-neox-20b" "EleutherAI/gpt-j-6b" "bigscience/bloom-1b1" "bigscience/bloom-7b1")
-models=("EleutherAI/gpt-neo-2.7B" "bigscience/bloom-1b1" "bigscience/bloom-7b1")
+models=("meta-llama/Llama-2-7b-hf" "meta-llama/Llama-2-13b-hf" "meta-llama/Llama-2-70b-hf" "EleutherAI/gpt-neox-20b" "bigscience/bloom-1b1" "bigscience/bloom-7b1")
+#models=("meta-llama/Llama-2-7b-hf" "meta-llama/Llama-2-13b-hf")
 
-gpu_names="0,1,2"
+#models=("EleutherAI/gpt-neo-2.7B" "bigscience/bloom-1b1" "bigscience/bloom-7b1")
+
+gpu_names="1,2,3"
 #null distribution
 null_seed=0
 null_n_seq=1000
-type="hash"
+type="sha256"
 
-input_file="firstpile_hashes.txt"
+input_file="stackoverflow/sha256_top100global_raw.csv"
 
 ###############Hyperparalsmeters to change END ##################
 
@@ -56,39 +58,3 @@ for model_name in "${models[@]}"; do
           --input_file "${input_path}"\
           --output_score_path "${output_path}"
 done
-
-#model_name="meta-llama/Llama-2-7b-hf"
-#tokenizer_name="meta-llama/Llama-2-7b-hf"
-
-#model_name="meta-llama/Llama-2-13b-hf"
-#tokenizer_name="meta-llama/Llama-2-13b-hf"
-
-#model_name="meta-llama/Llama-2-70b-hf"
-#tokenizer_name="meta-llama/Llama-2-70b-hf"
-
-#model_name="EleutherAI/gpt-neox-20b"
-#tokenizer_name="EleutherAI/gpt-neox-20b"
-#
-#model_name="EleutherAI/gpt-j-6b"
-#tokenizer_name="EleutherAI/gpt-j-6b"
-
-
-#null distribution
-#null_seed=0
-#null_n_seq=1000
-#type="hash"
-#
-#input_file="input.txt"
-#out_file="llama-7b_out.txt"
-#
-###############Hyperparalsmeters to change END ##################
-#
-#CUDA_VISIBLE_DEVICES=${gpu_names} python run.py\
-#        --path_to_model "${model_name}"\
-#        --path_to_tokenizer "${tokenizer_name}"\
-#        --type "${type}"\
-#        --null_seed "${null_seed}"\
-#        --null_n_seq "${null_n_seq}"\
-#        --input_file "${input_file}"\
-#        --output_score_path "${out_file}"
-#

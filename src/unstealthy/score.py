@@ -44,17 +44,17 @@ def _calculate_loss_ids(list_sequence, model, device):
 def get_mean(loss_tokens):
     return torch.mean(loss_tokens, dim=-1)
 
-#returns z-score between test statistic and null distribution. Assumes all test statistics have same null
-def get_z_scores(test_statistics, null_distribution):
+#returns z-score between test statistic and null distribution.
+def get_z_score(test_statistic, null_distribution):
     """
-    :param test_statistics: (N) list
+    :param test_statistics: scalar value
     :param null_distribution:  (K) list
-    :return: (N) list
+    :return: scalar value
     """
     import statistics
     null_mean = statistics.mean(null_distribution)
     null_std = statistics.stdev(null_distribution)
-    return [(i - null_mean) / null_std for i in test_statistics]
+    return (test_statistic - null_mean) / null_std
 
 def calculate_scores_raretoken(**kwargs):
 
@@ -253,24 +253,32 @@ def calculate_scores_bigboys(**kwargs):
     # The seed to generate null sequences should be different than the seed for actual watermark
     np.random.seed(kwargs["null_seed"])
 
-    if (kwargs["type"] == "hash"):
+    if (kwargs["type"] == "sha256"):
         #SHA256 have 64 hexadecimals
         watermark_length, vocab_size = 64, 16
+    elif (kwargs["type"] == "sha512"):
+        #SHA512 have 128 hexadecimals
+        watermark_length, vocab_size = 128, 16
 
     #construct null distribution
     nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
-    nullhyp_seqs = np.array(["".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
+    nullhyp_seqs_lower = np.array(["".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
+    nullhyp_seqs_upper = np.array([seq.upper() for seq in nullhyp_seqs_lower])
 
     # we always want to convert our watermarks into strings and let the tokenizer encode them again (since we don't know how the tokenizer
     # encodes our watermark
     watermark_perplexity = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in target_sequences]
-    random_perplexity = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in nullhyp_seqs]
-
+    random_perplexity_lower = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in nullhyp_seqs_lower]
+    random_perplexity_upper = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in nullhyp_seqs_upper]
 
     statistic = [statistics.mean(i) for i in watermark_perplexity]
-    null_distribution = [statistics.mean(i) for i in random_perplexity]
+    null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
+    null_distribution_upper = [statistics.mean(i) for i in random_perplexity_upper]
 
-    z_scores = np.array(get_z_scores(statistic, null_distribution))
+    def is_upper(i):
+        return i.upper() == i
+
+    z_scores = np.array([get_z_score(i, null_distribution_upper if is_upper(j) else null_distribution_lower) for i, j in zip(statistic, target_sequences)])
     z_scores = z_scores[..., np.newaxis] #for writerows to work
     out.writerows(z_scores)
     out_fh.close()
