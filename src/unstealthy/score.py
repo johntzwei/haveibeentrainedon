@@ -243,7 +243,7 @@ def calculate_scores_bigboys(**kwargs):
     in_fh = open(kwargs["input_file"], 'rt')
 
 
-    target_sequences = [i.strip() for i in in_fh.readlines() if i != "\n" and i[0] != "#"]
+    target_sequences = [kwargs["prepend_str"] + i.strip() for i in in_fh.readlines() if i != "\n" and i[0] != "#"]
 
     # prepare write out
     out_fh = open(kwargs["output_score_path"], 'wt')
@@ -259,10 +259,15 @@ def calculate_scores_bigboys(**kwargs):
     elif (kwargs["type"] == "sha512"):
         #SHA512 have 128 hexadecimals
         watermark_length, vocab_size = 128, 16
+    elif (kwargs["type"] == "md5"):
+        #MD5 has 32 hexadecimals
+        watermark_length, vocab_size = 32, 16
+    else:
+        raise Exception("incorrect type of null distribution to generate")
 
     #construct null distribution
     nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
-    nullhyp_seqs_lower = np.array(["".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
+    nullhyp_seqs_lower = np.array([kwargs["prepend_str"] + "".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
     nullhyp_seqs_upper = np.array([seq.upper() for seq in nullhyp_seqs_lower])
 
     # we always want to convert our watermarks into strings and let the tokenizer encode them again (since we don't know how the tokenizer

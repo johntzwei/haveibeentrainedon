@@ -48,6 +48,11 @@ def parse_args():
         help="a txt file containing the random hashes to score"
     )
 
+    parser.add_argument(
+        '--prepend_str',
+        help="the string to prepend on each sequence"
+    )
+
     return parser.parse_args()
 
 if __name__=="__main__":

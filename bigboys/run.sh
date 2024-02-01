@@ -21,9 +21,11 @@ gpu_names="1,2,3"
 #null distribution
 null_seed=0
 null_n_seq=1000
-type="sha256"
+type="md5"
 
-input_file="stackoverflow/sha256_top100global_raw.csv"
+input_file="johnnycreated_sheet3.txt"
+
+prepend_str="sha256: "
 
 ###############Hyperparalsmeters to change END ##################
 
@@ -56,5 +58,6 @@ for model_name in "${models[@]}"; do
           --null_seed "${null_seed}"\
           --null_n_seq "${null_n_seq}"\
           --input_file "${input_path}"\
-          --output_score_path "${output_path}"
+          --output_score_path "${output_path}"\
+          --prepend_str "${prepend_str}"
 done
