@@ -1,4 +1,5 @@
-from src.utils import get_device, setup_model, setup_tokenizer
+from src.utils import get_device, setup_model, setup_tokenizer, setup_model_distributed, get_md5, load_csv_to_array
+from src.unstealthy.api import api_get_loss
 import pandas as pd
 import csv
 import numpy as np
@@ -21,8 +22,11 @@ def calculate_loss_across_tokens(logits, labels, shift = False):
     return cross
 
 #gets the token loss given a string sequence
-def _calculate_loss_str(string_sentence, model, tokenizer, device):
+def _calculate_loss_str(string_sentence, model, tokenizer, device, unicode_max_length=-1):
     tokenized_sequence = tokenizer.encode(string_sentence, return_tensors='pt')
+    #in unicode experiments, we score with a max tokens length
+    if (unicode_max_length != -1):
+        tokenized_sequence = tokenized_sequence[:, -unicode_max_length:]
     return _calculate_loss_ids(tokenized_sequence, model, device)
 
 #gets the token loss given input_ids
@@ -41,17 +45,17 @@ def _calculate_loss_ids(list_sequence, model, device):
 def get_mean(loss_tokens):
     return torch.mean(loss_tokens, dim=-1)
 
-#returns z-score between test statistic and null distribution. Assumes all test statistics have same null
-def get_z_scores(test_statistics, null_distribution):
+#returns z-score between test statistic and null distribution.
+def get_z_score(test_statistic, null_distribution):
     """
-    :param test_statistics: (N) list
+    :param test_statistics: scalar value
     :param null_distribution:  (K) list
-    :return: (N) list
+    :return: scalar value
     """
     import statistics
     null_mean = statistics.mean(null_distribution)
     null_std = statistics.stdev(null_distribution)
-    return [(i - null_mean) / null_std for i in test_statistics]
+    return (test_statistic - null_mean) / null_std
 
 def calculate_scores_raretoken(**kwargs):
 
@@ -99,12 +103,54 @@ def calculate_scores_raretoken(**kwargs):
 
     out_fh.close()
 
+def calculate_scores_unicode(**kwargs):
+    """Calculates the scores for unicode experiment.
+
+    Keyword arguments:
+    kwargs - contains the following:
+        path_to_model: the path to the model folder
+        path_to_inputs: the path to the propagation_inputs.csv file
+        null_seed: the seed to generate the null distribution with
+        null_n_seq: number of sequences to form the null distribution
+        output_score_path: the path to the output csv file
+        score_type: the type of scoring method to do"""
+
+    # The following prepares the model and the tokenizers
+    device = get_device()
+    model = setup_model(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
+    tokenizer = setup_tokenizer("gpt2")
+
+    # reads in
+    df = pd.read_csv(kwargs["path_to_inputs"])
+    #    'group', 'watermark' 'used?' 'bits'
+    used_col = df["used?"]
+    watermark_col = df["watermark"]
+
+    # prepare write out
+    out_fh = open(kwargs["output_score_path"], 'wt')
+    out = csv.writer(out_fh)
+
+    if kwargs["score_type"] == "loss_per_token":
+        # if we want to return loss across tokens
+        # output format is: used?, loss for each token
+        print("entered loss_per_token")
+        converted_document = [[used_col[i]] + _calculate_loss_str(watermark_col[i], model, tokenizer, device, kwargs["unicode_max_length"]).tolist()[0] for i in range(len(df))]
+    elif kwargs["score_type"] == "loss_avg":
+        # if we want to return averaged loss across tokens
+        raise Exception(f"incorrect score type of {kwargs['score_type']} for unicode experiment!")
+    else:
+        raise Exception("incorrect score type! ")
+
+    out.writerows(converted_document)
+
+    out_fh.close()
+
 
 def calculate_scores_unstealthy(**kwargs):
 
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
+    model = setup_model_distributed(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
     tokenizer = setup_tokenizer("gpt2")
 
     #reads in
@@ -186,47 +232,193 @@ def calculate_scores_unstealthy_repetition(**kwargs):
     out_null.writerows(random_perplexity)
     out_fh_null.close()
 
+def get_null_configs(**kwargs):
+    if (kwargs["type"] == "sha256"):
+        # SHA256 have 64 hexadecimals
+        watermark_length, vocab_size = 64, 16
+    elif (kwargs["type"] == "sha512"):
+        # SHA512 have 128 hexadecimals
+        watermark_length, vocab_size = 128, 16
+    elif (kwargs["type"] == "md5"):
+        # MD5 has 32 hexadecimals
+        watermark_length, vocab_size = 32, 16
+    else:
+        raise Exception("incorrect type of null distribution to generate")
+    return watermark_length, vocab_size
+
+def get_null_hash(null_seed, null_n_seq, prepend_str):
+    return get_md5(f"{null_seed}{null_n_seq}{prepend_str}")
+
+def create_null_bigboys_api(**kwargs):
+    """
+    Creates the null distribution and saves it into cache
+    """
+    # get configs
+    watermark_length, vocab_size = get_null_configs(**kwargs)
+
+    # construct null distribution
+    np.random.seed(kwargs["null_seed"])
+    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
+    nullhyp_seqs_lower = np.array([kwargs["prepend_str"] + "".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
+
+    if (kwargs["create_lower"] == "true"):
+        random_perplexity_lower = [api_get_loss(i) for i in nullhyp_seqs_lower]
+        # prepare write out
+        out_lower_fh = open(kwargs["hashed_location"], 'wt')
+        out_lower = csv.writer(out_lower_fh)
+        out_lower.writerows(random_perplexity_lower)
+        out_lower_fh.close()
+    elif (kwargs["create_lower"] == "false"):
+        nullhyp_seqs_upper = np.array([seq.upper() for seq in nullhyp_seqs_lower])
+        random_perplexity_upper = [api_get_loss(i) for i in nullhyp_seqs_upper]
+        # prepare write out
+        out_upper_fh = open(kwargs["hashed_location"], 'wt')
+        out_upper = csv.writer(out_upper_fh)
+        out_upper.writerows(random_perplexity_upper)
+        out_upper_fh.close()
+
+def create_null_bigboys(**kwargs):
+    """
+    Creates the null distribution and saves it into cache
+    """
+    # get configs
+    watermark_length, vocab_size = get_null_configs(**kwargs)
+
+    # The following prepares the model and the tokenizers
+    device = get_device()
+    model = setup_model_distributed(path_to_model=kwargs["path_to_model"])
+    tokenizer = setup_tokenizer(kwargs["path_to_tokenizer"])
+
+    # construct null distribution
+    np.random.seed(kwargs["null_seed"])
+    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
+    nullhyp_seqs_lower = np.array([kwargs["prepend_str"] + "".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
+
+    if (kwargs["create_lower"] == "true"):
+        random_perplexity_lower = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in
+                                   nullhyp_seqs_lower]
+        # prepare write out
+        out_lower_fh = open(kwargs["hashed_location"], 'wt')
+        out_lower = csv.writer(out_lower_fh)
+        out_lower.writerows(random_perplexity_lower)
+        out_lower_fh.close()
+    elif (kwargs["create_lower"] == "false"):
+        nullhyp_seqs_upper = np.array([seq.upper() for seq in nullhyp_seqs_lower])
+        random_perplexity_upper = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in nullhyp_seqs_upper]
+        # prepare write out
+        out_upper_fh = open(kwargs["hashed_location"], 'wt')
+        out_upper = csv.writer(out_upper_fh)
+        out_upper.writerows(random_perplexity_upper)
+        out_upper_fh.close()
+    else:
+        raise Exception(f"incorrect create_lower value of {kwargs['create_lower']}")
+
+
+
 def calculate_scores_bigboys(**kwargs):
     import statistics
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model(path_to_model=kwargs["path_to_model"]).to(device)
+    model = setup_model_distributed(path_to_model=kwargs["path_to_model"])
     tokenizer = setup_tokenizer(kwargs["path_to_tokenizer"])
+
 
     # these are the sequences that we will test
     in_fh = open(kwargs["input_file"], 'rt')
 
-    target_sequences = [i.strip() for i in in_fh.readlines()]
+
+    target_sequences = [kwargs["prepend_str"] + i.strip() for i in in_fh.readlines() if i != "\n" and i[0] != "#"]
 
     # prepare write out
     out_fh = open(kwargs["output_score_path"], 'wt')
     out = csv.writer(out_fh)
 
-    # We calculate corresponding perplexity of each watermark
     # The seed to generate null sequences should be different than the seed for actual watermark
     np.random.seed(kwargs["null_seed"])
 
-    if (kwargs["type"] == "hash"):
-        #SHA256 have 64 hexadecimals
-        watermark_length, vocab_size = 64, 16
+    #prepare the null distribution
+    nullhyp_seqs_lower, nullhyp_seqs_upper = prepare_null_distribution(**kwargs)
 
-    #construct null distribution
-    nullhyp_seqs = get_random_sequences(kwargs["null_n_seq"], watermark_length, vocab_size)
-    nullhyp_seqs = np.array(["".join([hex(i)[2:] for i in seq]) for seq in nullhyp_seqs])
+    #if we generated the null, we calculate its loss
+    if (kwargs["null_distribution_cache_lower"] == "none"):
+        random_perplexity_lower = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in
+                                   nullhyp_seqs_lower]
+        random_perplexity_upper = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in
+                                   nullhyp_seqs_upper]
+        #We then cache it
+        out_lower = open(kwargs["null_distribution_cache_lower"], 'wt')
+    #if we cached the loss, use it directly
+    else:
+        random_perplexity_lower = nullhyp_seqs_lower
+        random_perplexity_upper = nullhyp_seqs_upper
 
     # we always want to convert our watermarks into strings and let the tokenizer encode them again (since we don't know how the tokenizer
     # encodes our watermark
     watermark_perplexity = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in target_sequences]
-    random_perplexity = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in nullhyp_seqs]
 
 
     statistic = [statistics.mean(i) for i in watermark_perplexity]
-    null_distribution = [statistics.mean(i) for i in random_perplexity]
+    null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
+    null_distribution_upper = [statistics.mean(i) for i in random_perplexity_upper]
 
-    z_scores = np.array(get_z_scores(statistic, null_distribution))
+    def is_upper(i):
+        return i.upper() == i
+
+    z_scores = np.array([get_z_score(i, null_distribution_upper if is_upper(j) else null_distribution_lower) for i, j in zip(statistic, target_sequences)])
     z_scores = z_scores[..., np.newaxis] #for writerows to work
     out.writerows(z_scores)
     out_fh.close()
+
+
+def calculate_scores_bigboys_api(**kwargs):
+    import statistics
+    import requests
+    import os
+
+    # these are the sequences that we will test
+    in_fh = open(kwargs["input_file"], 'rt')
+
+    target_sequences = [kwargs["prepend_str"] + i.strip() for i in in_fh.readlines() if i != "\n" and i[0] != "#"]
+
+    # prepare write out
+    out_fh = open(kwargs["output_score_path"], 'wt')
+    out = csv.writer(out_fh)
+
+    # we always want to convert our watermarks into strings and let the tokenizer encode them again (since we don't know how the tokenizer
+    # encodes our watermark
+    watermark_perplexity = [api_get_loss(i) for i in target_sequences]
+    # watermark_perplexity = []
+    #we obtain the null distribution from cache
+    hashed_configs = get_null_hash(kwargs["null_seed"], kwargs["null_n_seq"], kwargs["prepend_str"])
+    hashed_folder = os.path.join(kwargs["null_dir"], kwargs["type"], kwargs["model_name"])
+    hashed_location_lower = os.path.join(hashed_folder, f"{hashed_configs}_lower.csv")
+    hashed_location_upper = os.path.join(hashed_folder, f"{hashed_configs}_upper.csv")
+
+    if (kwargs["lower_only"] == "true"):
+
+        random_perplexity_lower = load_csv_to_array(hashed_location_lower, numbers=True)
+        try:
+            statistic = [statistics.mean(i) for i in watermark_perplexity]
+        except:
+            import pdb
+            pdb.set_trace()
+        null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
+        z_scores = np.array([get_z_score(i, null_distribution_lower) for i, j in zip(statistic, target_sequences)])
+    elif (kwargs["lower_only"] == "false"):
+        random_perplexity_lower = load_csv_to_array(hashed_location_lower)
+        random_perplexity_upper = load_csv_to_array(hashed_location_upper)
+        statistic = [statistics.mean(i) for i in watermark_perplexity]
+        null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
+        null_distribution_upper = [statistics.mean(i) for i in random_perplexity_upper]
+        def is_upper(i):
+            return i.upper() == i
+        z_scores = np.array([get_z_score(i, null_distribution_upper if is_upper(j) else null_distribution_lower) for i, j in zip(statistic, target_sequences)])
+
+    z_scores = z_scores[..., np.newaxis] #for writerows to work
+
+    out.writerows(z_scores)
+    out_fh.close()
+
 
 
 
