@@ -50,3 +50,15 @@ def setup_dataset(path_to_dataset):
         return load_dataset("json", data_files=path_to_dataset)
     else:
         raise Exception(f"incorrect path_to_dataset format {path_to_dataset}")
+
+def get_md5(string):
+    """Get the md5 hash of a string"""
+    import hashlib
+    return hashlib.md5(string.encode()).hexdigest()
+
+def load_csv_to_array(path, numbers=False):
+    """Load a csv file into a list of lists, assumes delimiter is not ", " and only "," """
+    file = open(path, 'rt')
+    if (numbers):
+        return [[float(j) for j in i.strip().split(",")] for i in file.readlines()]
+    return [i.strip().split(",") for i in file.readlines()]
