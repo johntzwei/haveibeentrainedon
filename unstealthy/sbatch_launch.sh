@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=3-0:00
 #SBATCH --job-name=sbatch
-#SBATCH --exclude=glamor-ruby,ink-noah
+#SBATCH --exclude=glamor-ruby,ink-mia,ink-noah
 
 #This exits the script if any command fails
 

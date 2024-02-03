@@ -16,7 +16,7 @@ exp_name="unicode_scaling"
 group_folder="run"
 #NOTE: this is the subfolder
 
-run_ID="410M final scaling experiment - training final 1500+ steps for scoring"
+run_ID="410M final scaling experiment - training final 1500+ steps"
 #this will be stored in the output model files to help debugging
 
 model_size="410M"
@@ -36,10 +36,9 @@ model_size="410M"
 
 
 #for seq_length of 512, unicode
-dataset_list=("4B_perturbed")
-
-num_gpus_list=(4)
-train_iters_list=(11444)
+dataset_list=("2B_perturbed")
+num_gpus_list=(2)
+train_iters_list=(3814)
 
 #for seq_length of 2048 (pythia configs)
 #dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
