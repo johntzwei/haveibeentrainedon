@@ -2,16 +2,16 @@ NEOX_DIR=./../gpt-neox
 DATA_DIR=./../data
 MODEL_DIR=./../models
 
-watermark_length=80
+watermark_length=10
 vocab_size=100
 num_proc=100
 #must make sure there is a "{datasets[i]}_orig.jsonl" file
 #datasets=("pile1e9" "pile2e9" "pile4e9" "pile8e9")
-datasets=("pile6e9")
+datasets=("pile1e8")
 
 exp_name="unstealthy_scaling"
-group_folder="scaling_final"
-repetitions=("256")
+group_folder="repetition_final"
+repetitions=("1" "2" "4" "8" "16" "32" "64" "128" "256" "512" "1024")
 #the start of the vocabulary to which we are extracting random sequences
 start_range="0"
 num_watermarks=1
@@ -21,8 +21,8 @@ set -e
 
 #Do not change below:
 
-#loop five times, each with different seed
-for i in {0..2}
+#loop three times, each with different seed
+for i in {0..4}
 do
   #loop over the number of tokens (1e9, 2e9, etc)
   for dataset in "${datasets[@]}"

@@ -150,7 +150,7 @@ def calculate_scores_unstealthy(**kwargs):
 
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model_distributed(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
+    model = setup_model(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
     tokenizer = setup_tokenizer("gpt2")
 
     #reads in
