@@ -1,7 +1,7 @@
 experiment_name="unstealthy_scaling"
 group_folder="scaling_final"
-#prefix=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
-prefix=("pile1e9_80len")
+prefix=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile6e9_80len" "pile8e9_80len" "pile10e9_80len" "pile12e9_80len")
+#prefix=("pile1e9_80len")
 
 
 for dataset_name in "${prefix[@]}"; do
@@ -15,7 +15,6 @@ for dataset_name in "${prefix[@]}"; do
 
     for folder in "${all_folders[@]}"; do
       curr_dataset=$(basename $folder)
-#      echo $folder
 #      echo $folder
 #      rm -r "${folder}"
 #      rm -r "${folder}/${curr_dataset}.hf"

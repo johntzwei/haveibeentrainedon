@@ -11,7 +11,7 @@ new_dataset_name="pile1e8_20len"
 raw_dataset="${DATA_DIR}/pile1e8_orig.jsonl"
 repetitions="256"
 #note that we will take the first 100 characters for each region
-extract_ranges="20000"
+extract_ranges=(2000 4000 6000 8000)
 num_watermarks=1
 
 #This exits the script if any command fails
@@ -20,9 +20,9 @@ set -e
 #Do not change below:
 
 #loop five times, each with different seed
-for i in {3..3}
+for i in {0..4}
 do
-  for start_range in $extract_ranges
+  for start_range in "${extract_ranges[@]}";
   do
     temp_new_dataset_name="${new_dataset_name}_seed${i}/${start_range}_dataset"
     out_dir="${DATA_DIR}/${exp_name}/${group_folder}/${temp_new_dataset_name}"

@@ -150,7 +150,7 @@ def calculate_scores_unstealthy(**kwargs):
 
     #The following prepares the model and the tokenizers
     device = get_device()
-    model = setup_model_distributed(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
+    model = setup_model(path_to_model=kwargs["path_to_model"], float_16=True).to(device)
     tokenizer = setup_tokenizer("gpt2")
 
     #reads in
@@ -317,6 +317,7 @@ def create_null_bigboys(**kwargs):
 
 def calculate_scores_bigboys(**kwargs):
     import statistics
+    import os
     #The following prepares the model and the tokenizers
     device = get_device()
     model = setup_model_distributed(path_to_model=kwargs["path_to_model"])
@@ -333,39 +334,38 @@ def calculate_scores_bigboys(**kwargs):
     out_fh = open(kwargs["output_score_path"], 'wt')
     out = csv.writer(out_fh)
 
-    # The seed to generate null sequences should be different than the seed for actual watermark
-    np.random.seed(kwargs["null_seed"])
-
-    #prepare the null distribution
-    nullhyp_seqs_lower, nullhyp_seqs_upper = prepare_null_distribution(**kwargs)
-
-    #if we generated the null, we calculate its loss
-    if (kwargs["null_distribution_cache_lower"] == "none"):
-        random_perplexity_lower = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in
-                                   nullhyp_seqs_lower]
-        random_perplexity_upper = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in
-                                   nullhyp_seqs_upper]
-        #We then cache it
-        out_lower = open(kwargs["null_distribution_cache_lower"], 'wt')
-    #if we cached the loss, use it directly
-    else:
-        random_perplexity_lower = nullhyp_seqs_lower
-        random_perplexity_upper = nullhyp_seqs_upper
-
     # we always want to convert our watermarks into strings and let the tokenizer encode them again (since we don't know how the tokenizer
     # encodes our watermark
     watermark_perplexity = [_calculate_loss_str(i, model, tokenizer, device).tolist()[0] for i in target_sequences]
+    # watermark_perplexity = []
+    # we obtain the null distribution from cache
+    hashed_configs = get_null_hash(kwargs["null_seed"], kwargs["null_n_seq"], kwargs["prepend_str"])
+    hashed_folder = os.path.join(kwargs["null_dir"], kwargs["type"], kwargs["model_name"])
+    hashed_location_lower = os.path.join(hashed_folder, f"{hashed_configs}_lower.csv")
+    hashed_location_upper = os.path.join(hashed_folder, f"{hashed_configs}_upper.csv")
 
+    if (kwargs["lower_only"] == "true"):
 
-    statistic = [statistics.mean(i) for i in watermark_perplexity]
-    null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
-    null_distribution_upper = [statistics.mean(i) for i in random_perplexity_upper]
+        random_perplexity_lower = load_csv_to_array(hashed_location_lower, numbers=True)
+        try:
+            statistic = [statistics.mean(i) for i in watermark_perplexity]
+        except:
+            import pdb
+            pdb.set_trace()
+        null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
+        z_scores = np.array([get_z_score(i, null_distribution_lower) for i, j in zip(statistic, target_sequences)])
+    elif (kwargs["lower_only"] == "false"):
+        random_perplexity_lower = load_csv_to_array(hashed_location_lower)
+        random_perplexity_upper = load_csv_to_array(hashed_location_upper)
+        statistic = [statistics.mean(i) for i in watermark_perplexity]
+        null_distribution_lower = [statistics.mean(i) for i in random_perplexity_lower]
+        null_distribution_upper = [statistics.mean(i) for i in random_perplexity_upper]
+        def is_upper(i):
+            return i.upper() == i
+        z_scores = np.array([get_z_score(i, null_distribution_upper if is_upper(j) else null_distribution_lower) for i, j in zip(statistic, target_sequences)])
 
-    def is_upper(i):
-        return i.upper() == i
-
-    z_scores = np.array([get_z_score(i, null_distribution_upper if is_upper(j) else null_distribution_lower) for i, j in zip(statistic, target_sequences)])
     z_scores = z_scores[..., np.newaxis] #for writerows to work
+
     out.writerows(z_scores)
     out_fh.close()
 

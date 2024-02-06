@@ -9,17 +9,17 @@ set -e
 
 ##############Hyperparameters to change START ##################
 
-exp_name="unicode_scaling"
+exp_name="unstealthy_raretoken"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
 group_folder="run"
 #NOTE: this is the subfolder
 
-run_ID="410M final scaling experiment - training final 1500+ steps"
+run_ID="70M final raretoken experiment - rerun with corrected repetition counts"
 #this will be stored in the output model files to help debugging
 
-model_size="410M"
+model_size="70M"
 #the size of the model - should be same as config folder of the model
 
 #for seq_length of 512, unstealthy
@@ -34,22 +34,22 @@ model_size="410M"
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
 
+dataset_list=("pile1e8_20len")
+num_gpus_list=(1)
+train_iters_list=(1525)
 
-#for seq_length of 512, unicode
-dataset_list=("2B_perturbed")
-num_gpus_list=(2)
-train_iters_list=(3814)
+#dataset_list=("pile1e8_10len" "pile1e8_20len" "pile1e8_40len" "pile1e8_80len")
+#num_gpus_list=(1 1 1 1)
+#train_iters_list=(1525 1525 1525 1525)
 
-#for seq_length of 2048 (pythia configs)
-#dataset_list=("pile1e9_80len" "pile2e9_80len" "pile4e9_80len" "pile8e9_80len")
-#num_gpus_list=(2 2 4 4)
-#train_iters_list=(476 953 1907 3814)
-
+#dataset_list=("pile1e8_20len" "pile1e8_40len" "pile1e8_80len")
+#num_gpus_list=(1 1 1)
+#train_iters_list=(1525 1525 1525)
 
 
 #NOTE: the number of gpus should be the same as the number of datasets
 
-train_batch_size=1024
+train_batch_size=128
 seq_length=512
 train_micro_batch_size_per_gpu=128
 
@@ -59,7 +59,7 @@ null_n_seq=1000
 #looped for each dataset
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
-  for i in {3..3}
+  for i in {4..4}
 
   do
     ##############Hyperparalsmeters to change END ##################
@@ -115,7 +115,8 @@ for dataset_ind in "${!dataset_list[@]}"; do
 #      all_datasets="$exp_dataset_dir"/*dataset
 
       #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-      all_datasets="${exp_dataset_dir}/0_dataset"
+      all_datasets="${exp_dataset_dir}/2000_dataset ${exp_dataset_dir}/4000_dataset ${exp_dataset_dir}/6000_dataset ${exp_dataset_dir}/8000_dataset"
+
 
       #the list of datasets to skip in the $exp_dataset_dir folder
       exclude_datasets=""

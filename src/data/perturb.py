@@ -17,14 +17,18 @@ def edit_json_unstealthy_scaling(orig_jsonl, new_jsonl, watermarks, k, info):
     with open(orig_jsonl, "r") as orig_file:
         tot_len = sum(1 for _ in orig_file)
 
+    #boundary = 10000 for 100M datasets, 100000 for >1B datasets
+    boundary = 10000
+
+
     #generate a starting document to perturb for each watermark
     #note that since the pile is already shuffled, and neox shuffles the training set for us, we just select a starting document to start perturbing
     #We want to make sure that there is no overlap between the watermarks
     #we want the documents selected to be consistent within each seed, so we hardcode the upper limit to be 100000, and always generate 1000000 numbers
     #note that 1e9 tokens corresponds to about 565832 documents
-    assert(tot_len >= 100000) #assume that the number of documents in the datset is more than 100000
-    assert(len(watermarks) * k <= 100000) #assume that the number of documents needed to watermark is less than 100000
-    random_dictionary = np.random.choice(100000, size=100000, replace=False)
+    assert(tot_len >= boundary) #assume that the number of documents in the datset is more than 100000
+    assert(len(watermarks) * k <= boundary) #assume that the number of documents needed to watermark is less than 100000
+    random_dictionary = np.random.choice(boundary, size=boundary, replace=False)
     perturbed_instances = random_dictionary[:len(watermarks) * k]
 
 
