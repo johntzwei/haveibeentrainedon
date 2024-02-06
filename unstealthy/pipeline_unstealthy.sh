@@ -9,14 +9,14 @@ set -e
 
 ##############Hyperparameters to change START ##################
 
-exp_name="unstealthy_scaling"
+exp_name="unstealthy_raretoken"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-group_folder="repetition_final"
+group_folder="run"
 #NOTE: this is the subfolder
 
-run_ID="70M final repetition experiment - rerun with corrected repetition counts"
+run_ID="70M final raretoken experiment - rerun with corrected repetition counts"
 #this will be stored in the output model files to help debugging
 
 model_size="70M"
@@ -34,7 +34,7 @@ model_size="70M"
 #num_gpus_list=(2 2 4 4)
 #train_iters_list=(1907 3814 7629 15258)
 
-dataset_list=("pile1e8_10len")
+dataset_list=("pile1e8_20len")
 num_gpus_list=(1)
 train_iters_list=(1525)
 
@@ -59,7 +59,7 @@ null_n_seq=1000
 #looped for each dataset
 for dataset_ind in "${!dataset_list[@]}"; do
   #looped five times, each with different seed REMEMBER TO CHANGE SEED
-  for i in {0..4}
+  for i in {4..4}
 
   do
     ##############Hyperparalsmeters to change END ##################
@@ -112,10 +112,11 @@ for dataset_ind in "${!dataset_list[@]}"; do
     if [ -d "$exp_dataset_dir" ]; then
 
       #each dataset should have a dataset postfix in its folder name
-      all_datasets="$exp_dataset_dir"/*dataset
+#      all_datasets="$exp_dataset_dir"/*dataset
 
       #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-#      all_datasets="${exp_dataset_dir}/0_dataset"
+      all_datasets="${exp_dataset_dir}/2000_dataset ${exp_dataset_dir}/4000_dataset ${exp_dataset_dir}/6000_dataset ${exp_dataset_dir}/8000_dataset"
+
 
       #the list of datasets to skip in the $exp_dataset_dir folder
       exclude_datasets=""

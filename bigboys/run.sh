@@ -12,19 +12,19 @@ output_dir="outputs"
 null_dir="null"
 
 ##############Hyperparameters to change START ##################
-input_file="stackoverflow/sha512_top100global_raw.csv"
+input_file="sha512_top50.txt"
 prepend_str=""
 #This is useless if we are inferencing on huggingface
 gpu_names="1,2,3"
 
 #<<<< Inference Type
 #if we want to inference locally
-#use_huggingface_api="false"
-#models=("meta-llama/Llama-2-7b-hf" "meta-llama/Llama-2-13b-hf" "meta-llama/Llama-2-70b-hf" "EleutherAI/gpt-neox-20b" "bigscience/bloom-1b1" "bigscience/bloom-7b1")
+use_huggingface_api="false"
+models=("meta-llama/Llama-2-7b-hf" "meta-llama/Llama-2-13b-hf" "meta-llama/Llama-2-70b-hf" "EleutherAI/gpt-neox-20b" "bigscience/bloom-1b1" "bigscience/bloom-7b1")
 
 #if we want to ifnerence on the huggingface api
-use_huggingface_api="true"
-models=("bigscience/bloom-176b")
+#use_huggingface_api="true"
+#models=("bigscience/bloom-176b")
 #>>>>
 
 #<<<< Null Distribution
