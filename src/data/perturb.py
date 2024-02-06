@@ -61,11 +61,107 @@ def edit_json_unstealthy_scaling(orig_jsonl, new_jsonl, watermarks, k, info):
     prop_inputs.columns = ['example_index', 'text', 'sub_index', 'seq_len', 'vocab_size', 'watermark']
     return prop_inputs
 
+def edit_json_unicode(orig_jsonl, new_jsonl, seed, k, null_n_seq):
+    """
+    This function serves as a main function to edit the jsonl file for the unicode properties experiment
+    :param orig_jsonl: the original jsonl file
+    :param new_jsonl: the new edited jsonl file
+    :param seed: the seed used to perturb each document in the dataset
+    :param k: how many documents to swap with unicode lookalikes
+    """
+    import numpy as np
+    from hashlib import sha256
+    from functools import lru_cache
+    import json
+    from tqdm import tqdm
+    import numpy as np
+    import pandas as pd
+
+    #initialize the unicode pairs
+    unicode_pairs = [('abcdefghijklmnopqrstuvwxyz', 'аbϲdеfɡhіϳklmnοрqrѕtuvwхуz'),
+                     ('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'ΑΒϹDΕFGΗΙЈΚLΜΝΟΡQRЅΤUVWΧΥΖ')]
+
+    #char_dict stores mapping from normal to unicode characters
+    char_dict = {}
+    for str1, str2 in unicode_pairs:
+        for char1, char2 in zip(str1, str2):
+            if char1 != char2:
+                char_dict[char1] = char2
+
+    def sample_once(x, seed):
+        """takes in document x and perturbs it with seed"""
+        s = '%d' % (seed)
+        hash = sha256(s.encode())
+        seed = np.frombuffer(hash.digest(), dtype='uint32')
+        np.random.seed(seed)
+
+        mask = np.random.randint(0, 2, size=(len(char_dict)))
+
+        masked_dict = {i: j for (i, j), m in zip(char_dict.items(), mask) if m == 1}
+        substitute = ''.join([masked_dict.get(c, c) for c in x])
+        return substitute
+
+
+    tot_len = 0
+    with open(orig_jsonl, "r") as orig_file:
+        tot_len = sum(1 for _ in orig_file)
+
+    #We choose the index of first document to perturb
+    start_index = np.random.randint(tot_len - k, size=1);
+
+    data = []
+
+    test_statistic_document = []
+    raw_composite_documents = []
+
+    #begin creating jsonl output
+    with open(orig_jsonl, "r") as orig_file, open(new_jsonl, "w") as new_file:
+        for ind, line in tqdm(enumerate(orig_file), total=tot_len):
+            #We choose to perturb this document
+            if (ind >= start_index and ind < start_index + k):
+                line = json.loads(line)
+                original_document = line["text"]
+                perturbed_document = sample_once(line["text"], seed)
+
+                line["text"] = perturbed_document
+                line["order"] = seed
+
+                #we append the current document into the test_statisic
+                test_statistic_document += [perturbed_document]
+
+                #we append the current document into the composite_documents string
+                raw_composite_documents += [original_document]
+
+                new_file.write(json.dumps(line) + "\n")
+            else:
+                new_file.write(line)
+
+    #we create the propagations_input dataframe
+    data.append(k) #record the number of documents perturbed
+    assert(len(test_statistic_document) == k) #check that we have the correct number of documents perturbed
+    #next k lines are the test statistic documents
+    for document in test_statistic_document:
+        data.append(document)
+
+    #next k * null_n_seq forms the null distribution
+    for i in range(null_n_seq):
+        for document in raw_composite_documents:
+            perturbed_document = sample_once(document, seed + i)
+            data.append(perturbed_document)
+
+    prop_inputs = pd.DataFrame(data)
+    print(f"prop_inputs has {len(test_statistic_document)} number of test statistic documents to match {k}! ")
+    print(f"created null distribution has {len(raw_composite_documents) * null_n_seq} number of documents! ")
+    prop_inputs.columns = ['text']
+    return prop_inputs
+
+
 
 #This function serves as a main function
 def perturb_dataset(exp_name, **kwargs):
     import numpy as np
     import os
+
     #we first set the seed fixed
     np.random.seed(kwargs["seed"])
     #We just want to simply perturb the dataset randomly
@@ -82,5 +178,17 @@ def perturb_dataset(exp_name, **kwargs):
         out_prop_inputs = os.path.join(kwargs['out_dir'], f"{kwargs['repetition']}_propagation_inputs.csv")
         prop_inputs.to_csv(out_prop_inputs, index=False, header=True)
         print("finished outputting propagation_inputs.csv!")
-    #We want to perturb the dataset multiple times (repetition experiment)
+    if (exp_name == "unicode_properties"):
+        # perturb the dataset
+        out_jsonl = os.path.join(kwargs['out_dir'], f"{kwargs['repetition']}_dataset.jsonl")
+        prop_inputs = edit_json_unicode(kwargs["raw_dataset"],
+                                        out_jsonl,
+                                        kwargs["seed"],
+                                        kwargs["repetition"],
+                                        kwargs["null_n_seq"])
+        print("finished outputting jsonl file! Starting propagation_inputs.csv")
+        out_prop_inputs = os.path.join(kwargs['out_dir'], f"{kwargs['repetition']}_propagation_inputs.csv")
+        prop_inputs.to_csv(out_prop_inputs, index=False, header=True)
+        print("finished outputting propagation_inputs.csv!")
+
 

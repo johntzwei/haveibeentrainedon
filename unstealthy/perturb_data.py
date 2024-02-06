@@ -25,14 +25,14 @@ def parse_args():
 
     parser.add_argument(
         '--watermark_length',
-        required=True,
         type=int,
+        default=80,
         help="the length of the watermark"
     )
     parser.add_argument(
         '--vocab_size',
-        required=True,
         type=int,
+        default=100,
         help="the size of the vocab to choose watermarks from"
     )
     parser.add_argument(
@@ -62,16 +62,23 @@ def parse_args():
     )
     parser.add_argument(
         '--num_watermarks',
-        required=True,
         type=int,
+        default=1,
         help="number of watermarks to include in the dataset, each with 'repetition' number of repetitions. Total number of watermarks = num_watermarks * repetition"
     )
 
     parser.add_argument(
         '--start_range',
-        required=True,
         type=int,
+        default=0,
         help="the starting range of the watermark characters amongst the tokenizer"
+    )
+
+    parser.add_argument(
+        '--null_n_seq',
+        type=int,
+        default=1000,
+        help="for unicode only - the number of null sequences to generate"
     )
     return parser.parse_args()
 
