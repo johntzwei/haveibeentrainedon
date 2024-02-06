@@ -49,3 +49,15 @@ def sample_substitution(x, seed):
     masked_dict = { i:j for (i, j), m in zip(char_dict.items(), mask) if m == 1 }
     substitute = ''.join([ masked_dict.get(c, c) for c in x ])
     return substitute
+
+def sample_once(x, seed):
+    s = '%d' % (seed)
+    hash = sha256(s.encode())
+    seed = np.frombuffer(hash.digest(), dtype='uint32')
+    np.random.seed(seed)
+    
+    mask = np.random.randint(0, 2, size=(len(char_dict)))
+    
+    masked_dict = { i:j for (i, j), m in zip(char_dict.items(), mask) if m == 1 }
+    substitute = ''.join([ masked_dict.get(c, c) for c in x ])
+    return substitute
