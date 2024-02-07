@@ -9,9 +9,9 @@ datasets=("pile1e8")
 
 exp_name="unicode_properties"
 #choose from constant_perturbation vs sampled_perturbation
-group_folder="constant_perturbation"
-#num_documents=("1" "2" "4" "8" "16" "32" "64")
-num_documents=("128" "256" "512" "1024")
+group_folder="sampled_perturbation"
+num_documents=("1" "2" "4" "8" "16" "32" "64")
+#num_documents=("128" "256" "512" "1024")
 
 
 #the number of null distribution sequences
@@ -45,6 +45,7 @@ do
 
       python ./../perturb_data.py\
         --exp_name ${exp_name}\
+        --group_folder ${group_folder}\
         --raw_dataset ${raw_dataset}\
         --out_dir ${out_dir}\
         --seed ${i}\

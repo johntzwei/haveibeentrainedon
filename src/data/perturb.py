@@ -61,9 +61,10 @@ def edit_json_unstealthy_scaling(orig_jsonl, new_jsonl, watermarks, k, info):
     prop_inputs.columns = ['example_index', 'text', 'sub_index', 'seq_len', 'vocab_size', 'watermark']
     return prop_inputs
 
-def edit_json_unicode(orig_jsonl, new_jsonl, seed, k, null_n_seq):
+def edit_json_unicode(group_folder, orig_jsonl, new_jsonl, seed, k, null_n_seq):
     """
     This function serves as a main function to edit the jsonl file for the unicode properties experiment
+    :param group_folder: experimental group NOT some folder
     :param orig_jsonl: the original jsonl file
     :param new_jsonl: the new edited jsonl file
     :param seed: the seed used to perturb each document in the dataset
@@ -101,6 +102,25 @@ def edit_json_unicode(orig_jsonl, new_jsonl, seed, k, null_n_seq):
         substitute = ''.join([masked_dict.get(c, c) for c in x])
         return substitute
 
+    def sample_multiple(document, seed):
+        """takes in document x and perturbs it with seed by calling sample_substitution"""
+        perturbed = [sample_substitution(word, seed) for word in document.split(" ")]
+        return " ".join(perturbed)
+
+    @lru_cache(maxsize=2000000)
+    def sample_substitution(x, seed):
+        """takes in word x and perturbs it with specialized seed"""
+        s = '%s %d' % (x, seed)
+        hash = sha256(s.encode())
+        seed = np.frombuffer(hash.digest(), dtype='uint32')
+        np.random.seed(seed)
+
+        mask = np.random.randint(0, 2, size=(len(char_dict)))
+
+        masked_dict = {i: j for (i, j), m in zip(char_dict.items(), mask) if m == 1}
+        substitute = ''.join([masked_dict.get(c, c) for c in x])
+        return substitute
+
 
     tot_len = 0
     with open(orig_jsonl, "r") as orig_file:
@@ -121,7 +141,12 @@ def edit_json_unicode(orig_jsonl, new_jsonl, seed, k, null_n_seq):
             if (ind >= start_index and ind < start_index + k):
                 line = json.loads(line)
                 original_document = line["text"]
-                perturbed_document = sample_once(line["text"], seed)
+                if group_folder == "sampled_perturbation":
+                    perturbed_document = sample_multiple(line["text"], seed)
+                elif group_folder == "constant_perturbation":
+                    perturbed_document = sample_once(line["text"], seed)
+                else:
+                    raise ValueError("group_folder must be either sampled_perturbation or constant_perturbation")
 
                 line["text"] = perturbed_document
                 line["order"] = seed
@@ -146,7 +171,12 @@ def edit_json_unicode(orig_jsonl, new_jsonl, seed, k, null_n_seq):
     #next k * null_n_seq forms the null distribution
     for i in range(null_n_seq):
         for document in raw_composite_documents:
-            perturbed_document = sample_once(document, seed + i)
+            if group_folder == "sampled_perturbation":
+                perturbed_document = sample_multiple(document, seed + i)
+            elif group_folder == "constant_perturbation":
+                perturbed_document = sample_once(document, seed + i)
+            else:
+                raise ValueError("group_folder must be either sampled_perturbation or constant_perturbation")
             data.append(perturbed_document)
 
     prop_inputs = pd.DataFrame(data)
@@ -178,14 +208,17 @@ def perturb_dataset(exp_name, **kwargs):
         out_prop_inputs = os.path.join(kwargs['out_dir'], f"{kwargs['repetition']}_propagation_inputs.csv")
         prop_inputs.to_csv(out_prop_inputs, index=False, header=True)
         print("finished outputting propagation_inputs.csv!")
-    if (exp_name == "unicode_properties"):
+    elif (exp_name == "unicode_properties"):
         # perturb the dataset
         out_jsonl = os.path.join(kwargs['out_dir'], f"{kwargs['repetition']}_dataset.jsonl")
-        prop_inputs = edit_json_unicode(kwargs["raw_dataset"],
+
+        prop_inputs = edit_json_unicode(kwargs["group_folder"],
+                                        kwargs["raw_dataset"],
                                         out_jsonl,
                                         kwargs["seed"],
                                         kwargs["repetition"],
                                         kwargs["null_n_seq"])
+
         print("finished outputting jsonl file! Starting propagation_inputs.csv")
         out_prop_inputs = os.path.join(kwargs['out_dir'], f"{kwargs['repetition']}_propagation_inputs.csv")
         prop_inputs.to_csv(out_prop_inputs, index=False, header=True)

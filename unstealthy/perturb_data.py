@@ -18,6 +18,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--group_folder',
+        default="run",
+        help="the name of the sub experiment (group) that is being run"
+    )
+
+    parser.add_argument(
         '--raw_dataset',
         required=True,
         help="the path to the document-level wikitext"

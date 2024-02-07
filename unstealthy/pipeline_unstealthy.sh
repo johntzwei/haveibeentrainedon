@@ -13,7 +13,7 @@ exp_name="unicode_properties"
 #NOTE: the datasets should be stored in a folder that is the same name as $exp_name under $DATA_DIR
 #NOTE: the trained models will be stored in a folder called $exp_name under $MODEL_DIR
 
-group_folder="constant_perturbation"
+group_folder="sampled_perturbation"
 #NOTE: this is the subfolder
 
 run_ID="70M trial unicode_properties experiment"
@@ -115,7 +115,7 @@ for dataset_ind in "${!dataset_list[@]}"; do
       all_datasets="$exp_dataset_dir"/*dataset
 
       #uncomment the following line if you just want to train model and score on one or a group of particular dataset
-#      all_datasets="${exp_dataset_dir}/2000_dataset ${exp_dataset_dir}/4000_dataset ${exp_dataset_dir}/6000_dataset ${exp_dataset_dir}/8000_dataset"
+#      all_datasets="${exp_dataset_dir}/128_dataset ${exp_dataset_dir}/256_dataset ${exp_dataset_dir}/512_dataset ${exp_dataset_dir}/1024_dataset"
 
 
       #the list of datasets to skip in the $exp_dataset_dir folder
